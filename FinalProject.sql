@@ -1,0 +1,62 @@
+CREATE TABLE Movies (
+   MovieId INT PRIMARY KEY AUTO_INCREMENT,
+   Category  VARCHAR(32) DEFAULT NULL,
+   Title     TEXT DEFAULT NULL,
+   Country TEXT DEFAULT NULL,
+   ReleaseYear VARCHAR(32) DEFAULT NULL,
+   Duration VARCHAR(32) DEFAULT NULL,
+   Description  TEXT DEFAULT NULL,
+   DeletedAt DATETIME DEFAULT NULL
+);
+
+
+CREATE TABLE Actors (
+   ActorId INT PRIMARY KEY AUTO_INCREMENT,
+   ActorName        VARCHAR(32) DEFAULT NULL,
+   Age             INT DEFAULT NULL,
+   Gender          CHAR(1) DEFAULT NULL,
+   DeletedAt DATETIME DEFAULT NULL
+);
+
+
+CREATE TABLE Directors (
+   DirectorId INT PRIMARY KEY AUTO_INCREMENT,
+   DirectorName        VARCHAR(32)  DEFAULT NULL,
+   Age             INT DEFAULT NULL,
+   Gender          CHAR(1) DEFAULT NULL,
+   DeletedAt DATETIME DEFAULT NULL
+);
+
+
+CREATE TABLE Genres (
+   MovieId INT PRIMARY KEY AUTO_INCREMENT,
+   GenreType       VARCHAR(100) DEFAULT NULL,
+   DeletedAt DATETIME DEFAULT NULL,
+   FOREIGN KEY (MovieId) REFERENCES Movies (MovieId)
+);
+
+
+CREATE TABLE Ratings (
+   MovieId       INT PRIMARY KEY AUTO_INCREMENT,
+   Rating         VARCHAR(32) DEFAULT NULL,
+   DeletedAt DATETIME DEFAULT NULL,
+   FOREIGN KEY (MovieId) REFERENCES Movies (MovieId)
+);
+
+
+CREATE TABLE Recommendations (
+   MovieId       INT PRIMARY KEY AUTO_INCREMENT,
+   UserRating       INT DEFAULT NULL,
+   DeletedAt DATETIME DEFAULT NULL,
+   FOREIGN KEY (MovieId) REFERENCES Movies (MovieId)
+);
+
+
+CREATE TABLE StreamingService (
+   MovieId       INT PRIMARY KEY AUTO_INCREMENT,
+   Platform  VARCHAR(32) DEFAULT NULL,
+   DateAdded DATETIME DEFAULT NULL,
+   DeletedAt DATETIME DEFAULT NULL,
+   FOREIGN KEY (MovieId) REFERENCES Movies (MovieId)
+);
+
