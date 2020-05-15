@@ -1,11 +1,13 @@
-from flask import Flask, render_template, request, redirect, flash, url_for
+from flask import Flask, render_template, request, redirect, flash, url_for, Response
 import os
 import pymysql
+import io
+import csv
 
 app = Flask(__name__, template_folder="Templates")
 
 app.secret_key = '701701'
-conn = pymysql.connect("34.83.8.98","root","INSERT PASSWORD","FinalProject")
+conn = pymysql.connect("34.83.8.98","root","Hk1ru0HoKkjjzKzv","FinalProject")
 cursor = conn.cursor()
 
 @app.route('/', methods=['GET', 'POST'])
@@ -151,18 +153,26 @@ def insert():
         Description = request.form['Description']
         cursor.execute("INSERT INTO Movies (Category, Title, Country, ReleaseYear, Duration, Description) VALUES (%s, %s, %s, %s, %s, %s)", (Category, Title, Country, ReleaseYear, Duration, Description))
         conn.commit()
+        return redirect(url_for('Movies'))
 
-        """
-        # make sure other tables are updated with movie ID after inserting into movies
         MovieId = cursor.lastrowid
+
         # Actors
+        ActorName = request.form['ActorName']
+        Gender = request.form['Gender']
+        Age = request.form['Age']
         cursor.execute("INSERT INTO Actors(ActorName,Gender,Age)"
                          "VALUES(%s,%s,%s);", (ActorName,Gender,Age))
         conn.commit()
+        return redirect(url_for('Actors'))
+
+        """
         # Directors
         cursor.execute("INSERT INTO Directors(DirectorName,Gender,Age)"
                          "VALUES(%s,%s,%s);", (DirectorName,Gender,Age))
         conn.commit()
+        
+        # make sure other tables are updated with movie ID after inserting into movies
         # Genres
         cursor.execute("INSERT INTO Genres(MovieId, GenreType)"
                          "VALUES(%s,%s);", (MovieId, GenreType))
@@ -179,11 +189,10 @@ def insert():
        """
 
         flash("Record Inserted Successfully")
-        return redirect(url_for('Movies'))
 
 @app.route('/delete/<string:MovieId>', methods = ['GET'])
 def delete(MovieId):
-    cursor.execute("UPDATE Movies SET DeletedAt = current_date WHERE MovieId=%s", (MovieId,))
+    cursor.execute("UPDATE Movies, SET DeletedAt = current_date WHERE MovieId=%s", (MovieId,))
     conn.commit()
     flash("Record Deleted Successfully")
     return redirect(url_for('Movies'))
@@ -206,6 +215,110 @@ def update():
         flash("Data Updated Successfully")
         conn.commit()
         return redirect(url_for('Movies'))
+
+@app.route('/export',methods=['POST','GET'])
+def export():
+    if request.method == 'POST':
+        TableName = request.form['TableName']
+        if TableName == 'Movies':
+            cursor.execute("SELECT * FROM Movies")
+            result = cursor.fetchall()
+            output = io.StringIO()
+            writer = csv.writer(output)
+            line = ['Movie Id','Category','Title','Country','Release Year','Duration','Description','DeletedAt']
+            writer.writerow(line)
+            for row in result:
+                writer.writerow(row)
+            output.seek(0)
+            return Response(output, mimetype="text/csv",
+                        headers={"Content-Disposition": "attachment;filename=Movies.csv"})
+            # return redirect(url_for('Movies'))
+
+        elif TableName == 'Actors':
+            cursor.execute("SELECT * FROM Actors")
+            result = cursor.fetchall()
+            output = io.StringIO()
+            writer = csv.writer(output)
+            line = ['Actor Id', 'Actor Name', 'Age', 'Gender','DeletedAt']
+            writer.writerow(line)
+            for row in result:
+                writer.writerow(row)
+            output.seek(0)
+            return Response(output, mimetype="text/csv",
+                            headers={"Content-Disposition": "attachment;filename=Actors.csv"})
+            # return redirect(url_for('Actors'))
+
+        elif TableName == 'Directors':
+            cursor.execute("SELECT * FROM Directors")
+            result = cursor.fetchall()
+            output = io.StringIO()
+            writer = csv.writer(output)
+            line = ['Director Id', 'Director Name', 'Age', 'Gender', 'DeletedAt']
+            writer.writerow(line)
+            for row in result:
+                writer.writerow(row)
+            output.seek(0)
+            return Response(output, mimetype="text/csv",
+                            headers={"Content-Disposition": "attachment;filename=Directors.csv"})
+            # return redirect(url_for('Directors'))
+
+        elif TableName == 'Genres':
+            cursor.execute("SELECT * FROM Genres")
+            result = cursor.fetchall()
+            output = io.StringIO()
+            writer = csv.writer(output)
+            line = ['Movie Id', 'Genre Type','DeletedAt']
+            writer.writerow(line)
+            for row in result:
+                writer.writerow(row)
+            output.seek(0)
+            return Response(output, mimetype="text/csv",
+                            headers={"Content-Disposition": "attachment;filename=Genres.csv"})
+            # return redirect(url_for('Genres'))
+
+        elif TableName == 'Ratings':
+            cursor.execute("SELECT * FROM Ratings")
+            result = cursor.fetchall()
+            output = io.StringIO()
+            writer = csv.writer(output)
+            line = ['Movie Id', 'Rating', 'DeletedAt']
+            writer.writerow(line)
+            for row in result:
+                writer.writerow(row)
+            output.seek(0)
+            return Response(output, mimetype="text/csv",
+                            headers={"Content-Disposition": "attachment;filename=Ratings.csv"})
+            # return redirect(url_for('Ratings'))
+
+        elif TableName == 'Recommendations':
+            cursor.execute("SELECT * FROM Recommendations")
+            result = cursor.fetchall()
+            output = io.StringIO()
+            writer = csv.writer(output)
+            line = ['Movie Id', 'User Rating','DeletedAt']
+            writer.writerow(line)
+            for row in result:
+                writer.writerow(row)
+            output.seek(0)
+            return Response(output, mimetype="text/csv",
+                            headers={"Content-Disposition": "attachment;filename=Recommendations.csv"})
+            # return redirect(url_for('Recommendations'))
+
+        elif TableName == 'StreamingService':
+            cursor.execute("SELECT * FROM StreamingService")
+            result = cursor.fetchall()
+            output = io.StringIO()
+            writer = csv.writer(output)
+            line = ['Movie Id', 'Platform', 'Date Added', 'DeletedAt']
+            writer.writerow(line)
+            for row in result:
+                writer.writerow(row)
+            output.seek(0)
+            return Response(output, mimetype="text/csv",
+                            headers={"Content-Disposition": "attachment;filename=StreamingService.csv"})
+            # return redirect(url_for('StreamingService'))
+        else:
+            return redirect(url_for('Movies'))
 
 # Main method
 if __name__ == '__main__':
