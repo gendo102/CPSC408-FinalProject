@@ -1,0 +1,36 @@
+<doctype html="">
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class="flashes">
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+{% from "_formhelpers.html" import render_field %}
+
+
+    <h1 style="text-align:center;">Filtering</h1>
+<form method="post">
+  <dl>
+      <h4>Choose How to Filter Data:</h4>
+    {{ render_field(form.select_filter) }}
+    <p>
+      {{ render_field(form.select_rating) }}
+    <p>
+     {{ render_field(form.select_genre) }}
+    <p>
+     {{ render_field(form.select_category) }}
+      <p>
+        {{ render_field(form.select_platform) }}
+      <p>
+
+<h4>Choose How to Search Data:</h4>
+        {{ render_field(form.search_options) }}
+      <p>
+        {{ render_field(form.search_field) }}
+  </p></dl>
+  <p><input type="submit" value="Search">
+</p></form>
+</doctype>
