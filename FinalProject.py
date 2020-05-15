@@ -7,7 +7,7 @@ import csv
 app = Flask(__name__, template_folder="Templates")
 
 app.secret_key = '701701'
-conn = pymysql.connect("34.83.8.98","root","Hk1ru0HoKkjjzKzv","FinalProject")
+conn = pymysql.connect("34.83.8.98","root","INSERT PASSWORD","FinalProject")
 cursor = conn.cursor()
 
 @app.route('/', methods=['GET', 'POST'])
