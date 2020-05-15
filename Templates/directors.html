@@ -1,4 +1,51 @@
 {% include "home.html" %}
+{% include "export.html" %}
+
+<!--Insert data-->
+<div id="myModal" class="modal fade" role="dialog">
+   <div class="modal-dialog">
+      <div class="modal-content">
+         <div class="modal-header">
+
+             <h4 class="modal-title">Insert Directors Data</h4>
+
+         </div>
+
+         <div class="modal-body">
+
+            <form action="{{ url_for('insert') }}" method="POST">
+
+               <div class="form-group">
+                  <label>Director Name:</label>
+                  <input type="text" class="form-control" name="DirectorName" required="1">
+               </div>
+
+                <div class="form-group">
+                  <label>Age:</label>
+                  <input type="text" class="form-control" name="Age" required="1">
+               </div>
+
+                <div class="form-group">
+                  <label>Gender:</label>
+                  <input type="text" class="form-control" name="Gender" required="1">
+               </div>
+
+
+               <div class="form-group">
+                  <button class="btn btn-primary" type="submit">Submit</button>
+               </div>
+
+
+            </form>
+
+
+         </div>
+
+      </div>
+
+   </div>
+
+</div>
 
 <!--Display records in table-->
 
@@ -44,6 +91,7 @@ tr:nth-child(odd){
         <th>Age</th>
         <th>Gender</th>
         <th>DeletedAt</th>
+        <th>Action</th>
     </tr>
     {% for row in result %}
     <tr>
@@ -52,6 +100,12 @@ tr:nth-child(odd){
         <td>{{ row[2] }}</td>
         <td>{{ row[3] }}</td>
         <td>{{ row[4] }}</td>
+
+        <td>
+        <a href="/update/{{row[0] }}" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#modaledit{{row[0]}}">Edit</a>
+        <a href="/delete/{{ row[0] }}" class="btn btn-danger btn-xs" onclick="return confirm('Delete?')">Delete</a>
+        </td>
+
     </tr>
     {% endfor %}
     {% endif %}

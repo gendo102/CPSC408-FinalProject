@@ -1,5 +1,66 @@
 {% include "home.html" %}
-{% include "forms.html" %}
+{% include "export.html" %}
+
+<!--Insert data-->
+<div id="myModal" class="modal fade" role="dialog">
+   <div class="modal-dialog">
+      <div class="modal-content">
+         <div class="modal-header">
+
+             <h4 class="modal-title">Insert Movies Data</h4>
+
+         </div>
+
+         <div class="modal-body">
+
+            <form action="{{ url_for('insert') }}" method="POST">
+
+               <div class="form-group">
+                  <label>Category:</label>
+                  <input type="text" class="form-control" name="Category" required="1">
+               </div>
+
+                <div class="form-group">
+                  <label>Title:</label>
+                  <input type="text" class="form-control" name="Title" required="1">
+               </div>
+
+                <div class="form-group">
+                  <label>Country:</label>
+                  <input type="text" class="form-control" name="Country" required="1">
+               </div>
+
+                <div class="form-group">
+                  <label>Release Year:</label>
+                  <input type="text" class="form-control" name="ReleaseYear" required="1">
+               </div>
+
+                <div class="form-group">
+                  <label>Duration:</label>
+                  <input type="text" class="form-control" name="Duration" required="1">
+               </div>
+
+                <div class="form-group">
+                  <label>Description:</label>
+                  <input type="text" class="form-control" name="Description" required="1">
+               </div>
+
+
+               <div class="form-group">
+                  <button class="btn btn-primary" type="submit">Submit</button>
+               </div>
+
+
+            </form>
+
+
+         </div>
+
+      </div>
+
+   </div>
+
+</div>
 
 
 <!--Display records in table-->

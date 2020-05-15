@@ -1,4 +1,46 @@
 {% include "home.html" %}
+{% include "export.html" %}
+
+<!--Insert data-->
+<div id="myModal" class="modal fade" role="dialog">
+   <div class="modal-dialog">
+      <div class="modal-content">
+         <div class="modal-header">
+
+             <h4 class="modal-title">Insert Streaming Services Data</h4>
+
+         </div>
+
+         <div class="modal-body">
+
+            <form action="{{ url_for('insert') }}" method="POST">
+
+               <div class="form-group">
+                  <label>Platform:</label>
+                  <input type="text" class="form-control" name="Platform" required="1">
+               </div>
+
+                <div class="form-group">
+                  <label>Date Added:</label>
+                  <input type="date" class="form-control" name="DateAdded" required="1">
+               </div>
+
+
+               <div class="form-group">
+                  <button class="btn btn-primary" type="submit">Submit</button>
+               </div>
+
+
+            </form>
+
+
+         </div>
+
+      </div>
+
+   </div>
+
+</div>
 
 <!--Display records in table-->
 
@@ -44,6 +86,7 @@ tr:nth-child(odd){
         <th>Platform</th>
         <th>Date Added</th>
         <th>DeletedAt</th>
+        <th>Action</th>
     </tr>
     {% for row in result %}
     <tr>
@@ -51,6 +94,12 @@ tr:nth-child(odd){
         <td>{{ row[1] }}</td>
         <td>{{ row[2] }}</td>
         <td>{{ row[3] }}</td>
+
+        <td>
+        <a href="/update/{{row[0] }}" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#modaledit{{row[0]}}">Edit</a>
+        <a href="/delete/{{ row[0] }}" class="btn btn-danger btn-xs" onclick="return confirm('Delete?')">Delete</a>
+        </td>
+
     </tr>
     {% endfor %}
     {% endif %}
