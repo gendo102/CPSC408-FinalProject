@@ -1,0 +1,125 @@
+<style>
+
+header {
+  padding: 20px;
+	background: #e20716;
+    text-decoration: none;
+      list-style: none;
+
+}
+
+header a{
+    text-decoration: none;
+    color: #000000;
+
+}
+
+header a:visited{
+    text-decoration: none;
+    color: #000000;
+}
+
+body {
+	margin: 0;
+	font-family: 'Work Sans', sans-serif;
+	font-weight: 800;
+    background-color: rgba(47, 79, 79, 0);
+}
+
+.Content {
+  background: rgba(85, 214, 170, 0);
+}
+
+.Content ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.Content li {
+  display: inline-block;
+  margin-left: 30px;
+  padding-top: 15px;
+  position: relative;
+}
+
+.Content a {
+  color: #ff0f01;
+  text-decoration: none;
+  text-transform: uppercase;
+  font-size: 16px;
+}
+
+.Content a:hover {
+  color: #848484;
+}
+
+.Content a::before {
+  content: '';
+  display: block;
+  height: 5px;
+  background-color: #848484;
+
+  position: absolute;
+  top: 0;
+  width: 0%;
+}
+
+.Content a:hover::before {
+  width: 100%;
+}
+
+
+</style>
+<html lang="en">
+<header>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Movies Database</title>
+    <h1 align="center"><a href="{{ url_for('home') }}">Movies Database Website</a></h1>
+
+</header>
+
+
+  <div class = "Content">
+    <nav align="center">
+        <ul>
+          <li><a href="{{ url_for('Movies') }}">Movies</a></li>
+          <li><a href="{{ url_for('Actors') }}">Actors</a></li>
+          <li><a href="{{ url_for('Directors') }}">Directors</a></li>
+          <li><a href="{{ url_for('Genres') }}">Genres</a></li>
+          <li><a href="{{ url_for('Ratings') }}">Ratings</a></li>
+          <li><a href="{{ url_for('Recommendations') }}">Recommendations</a></li>
+          <li><a href="{{ url_for('StreamingService') }}">Streaming Services</a></li>
+      </ul>
+    </nav>
+  </div>
+
+
+
+    <style>
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+
+}
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+tr:nth-child(even) {
+    background-color: #dddddd;
+}
+tr:nth-child(odd){
+    background-color: #848484;
+}
+</style>
+
+
+  </div>
+
+
+</html>

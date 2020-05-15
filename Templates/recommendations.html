@@ -1,0 +1,63 @@
+{% include "home.html" %}
+
+<!--Display records in table-->
+
+    <style>
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+
+}
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+tr:nth-child(even) {
+    background-color: #dddddd;
+}
+tr:nth-child(odd){
+    background-color: #848484;
+}
+#table-wrapper {
+  position:relative;
+}
+#table-scroll {
+  height:300px;
+  overflow:auto;
+  margin-top:20px;
+}
+
+
+</style>
+
+<body>
+
+<div id="table-wrapper">
+    <div id="table-scroll">
+
+    <table id="Recommendations" style="width:100%">
+        {% if result %}
+    <tr>
+        <th>Movie ID</th>
+        <th>UserRating</th>
+        <th>DeletedAt</th>
+    </tr>
+    {% for row in result %}
+    <tr>
+        <td>{{ row[0] }}</td>
+        <td>{{ row[1] }}</td>
+        <td>{{ row[2] }}</td>
+    </tr>
+    {% endfor %}
+    {% endif %}
+
+</table>
+
+    </div>
+</div>
+
+</body>
+  </div>
+</html>

@@ -1,0 +1,97 @@
+<!--Login page-->
+
+<style>
+header {
+  padding: 20px;
+	background: #d42001;
+}
+
+body {
+	margin: 0;
+	font-family: 'Work Sans', sans-serif;
+	font-weight: 800;
+    background-color: #ffffff;
+}
+
+    .login {
+margin: 20px auto;
+width: 300px;
+}
+
+.login-screen {
+background-color: #ffffff;
+padding: 20px;
+border-radius: 5px
+}
+
+.control-group {
+margin-bottom: 10px;
+}
+
+input {
+text-align: center;
+background-color: #ECF0F1;
+border: 2px solid transparent;
+border-radius: 3px;
+font-size: 16px;
+font-weight: 200;
+padding: 10px 0;
+width: 250px;
+transition: border .5s;
+}
+
+input:focus {
+border: 2px solid #3498DB;
+box-shadow: none;
+}
+
+.btn {
+border: 2px solid transparent;
+background: #484848;
+color: #ffffff;
+font-size: 16px;
+line-height: 25px;
+padding: 10px 0;
+text-decoration: none;
+text-shadow: none;
+border-radius: 3px;
+box-shadow: none;
+transition: 0.25s;
+width: 250px;
+margin: 0 auto;
+}
+
+.btn:hover {
+background-color: #848484;
+}
+
+</style>
+
+<html lang="en">
+
+<header>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Movies Database</title>
+  <h1 align="center">Movies Database Website</h1>
+</header>
+
+<body>
+<div class="login-screen">
+<div class="login">
+    <div class="control-group">
+
+        <input type="text" class="login-field" value="" placeholder="username" name="username">
+<label class="login-field-icon fui-user" for="username"></label></div>
+<div class="control-group">
+				<input type="password" class="login-field" value="" placeholder="password" name="password">
+<label class="login-field-icon fui-lock" for="password"></label></div>
+    <a href ="{{ url_for('home') }}"><input type="submit" value="Log in" class="btn"></a>
+
+</div>
+</form>
+</div></div>
+</body>
+
+</html>
