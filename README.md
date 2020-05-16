@@ -2,7 +2,7 @@
 
 
 Instructions:
-Run FinalProject.sql in DataGrip 
-Make sure mySQL GCP database credentials are correct
-Run DataImporter.py by entering in the command line “python DataImporter.py final_data_new”
-Run flask app by entering in the command line “python FinalProject.py” 
+1. Run FinalProject.sql in DataGrip 
+2. Make sure mySQL GCP database credentials are correct
+3. Run DataImporter.py by entering in the command line “python DataImporter.py final_data_new”
+4. Run flask app by entering in the command line “python FinalProject.py” 
