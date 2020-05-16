@@ -8,13 +8,13 @@ import mysql.connector
 db = mysql.connector.connect(
     host="34.83.8.98",
     user="root",
-    passwd="INSERT DATABASE DETAILS HERE",
+    passwd="INSERT DB DETAILS HERE",
     database="FinalProject"
 )
 
 # Import data from csv into normalized database
 def dataImporter(filename):
-    with open(filename + ".csv", "r") as csv_data:
+    with open(filename + ".csv", "r", encoding='latin1') as csv_data:
         reader = csv.reader(csv_data)
         next(reader)
         for row in reader:
