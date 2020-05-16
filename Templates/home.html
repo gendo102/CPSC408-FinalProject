@@ -69,6 +69,30 @@ body {
   width: 100%;
 }
 
+.filtering ul {
+  margin: 40px;
+  padding: 0;
+  list-style: none;
+}
+
+.filtering a{
+  color: #ff0f01;
+  text-decoration: none;
+  text-transform: uppercase;
+  font-size: 16px;
+  width: 40px;
+  padding: 20px;
+  background: #ebebeb;
+  border: 2px solid #ebebeb;
+  border-radius: 4px;
+  font-size: 18px;
+}
+
+  .filtering a:hover {
+  color: #848484;
+}
+
+
 
 </style>
 <html lang="en">
@@ -92,7 +116,16 @@ body {
           <li><a href="{{ url_for('Ratings') }}">Ratings</a></li>
           <li><a href="{{ url_for('Recommendations') }}">Recommendations</a></li>
           <li><a href="{{ url_for('StreamingService') }}">Streaming Services</a></li>
+
       </ul>
+    </nav>
+  </div>
+
+<div class = "filtering">
+    <nav align="center">
+        <ul>
+<li><a href="{{ url_for('index') }}">Filtering</a></li>
+        </ul>
     </nav>
   </div>
 
@@ -123,4 +156,3 @@ tr:nth-child(odd){
 
 
 </html>
-
