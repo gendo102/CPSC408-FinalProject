@@ -4,6 +4,7 @@ import os
 import pymysql
 import io
 import csv
+import datetime
 
 app = Flask(__name__, template_folder="Templates")
 
@@ -143,53 +144,175 @@ def StreamingService():
     html_file = 'streamingservice.html'
     return render_template(html_file, result=result, content_type='application/json',data=table)
 
+########################## Inserting ############################################
+class MovieAddRatingForm(Form):
+    table_choices = [('Choose selection:', 'Choose selection:'),
+                      ('User Rating', 'User Rating'),
+                      ('Actor', 'Actor'),
+                      ('Director', 'Director'),
+                     ('Movie', 'Movie'), ]
+    add_table = SelectField('', choices=table_choices, default=None)
+
+    ###RECOMMENDATIONS
+    add_rec_title = StringField("Title", '', default=None)
+    user_rating_choices = [('Choose selection:', 'Choose selection:'),
+                      ('1', '1'),
+                      ('2', '2'),
+                      ('3', '3'),
+                      ('4', '4'),
+                      ('5', '5'),]
+    add_user_rating = SelectField("User Rating", choices=user_rating_choices, default=None)
+
+    ###ACTORS
+    add_actor_name = StringField("Name", '',  default=None)
+    add_actor_age = StringField("Age", '', default=None)
+    user_gender_choices = [('Choose selection:', 'Choose selection:'),
+                           ('M', 'M'),
+                           ('F', 'F'),]
+    add_gender_actor = SelectField("Gender", choices=user_gender_choices, default=None)
+
+    ###DIRECTORS
+    add_director_name = StringField("Name", '', default=None)
+    add_director_age = StringField("Age", '', default=None)
+    user_gender_choices = [('Choose selection:', 'Choose Choose selection:'),
+                           ('M', 'M'),
+                           ('F', 'F'), ]
+    add_gender_director = SelectField("Gender", choices=user_gender_choices, default=None)
+
+
+    ###MOVIE
+    category_choices = [('Choose selection:', 'Choose selection:'),
+                           ('Movie', 'Movie'),
+                           ('TV Show', 'TV Show'),
+                            ('Episode', 'Episode'),]
+    add_category = SelectField("Categories", choices=category_choices, default=None)
+    add_movie_title = StringField("Title", '', default=None)
+    add_country = StringField("Country", '', default=None)
+    add_release_year = StringField("Release Year", '', default=None)
+    add_duration = StringField("Duration", '', default=None)
+    add_description = StringField("Description", '', default=None)
+    choices_genre = [('Choose selection:', 'Choose selection:'),
+                     ('Action', 'Action'), ('Adventure', 'Adventure'),('Animation', 'Animation'),
+                     ('Comedy', 'Comedy'),('Crime', 'Crime'),('Documentary', 'Documentary'),
+                     ('Drama', 'Drama'),('Family', 'Family'),('Horror', 'Horror'),('Independent', 'Independent'),
+                     ('International', 'International'),('Romance', 'Romance'),('Sci-Fi', 'Sci-Fi'),('Sport', 'Sport'), ]
+    add_genre = SelectField('Genres', choices=choices_genre)
+    choices_rating = [('Choose selection:', 'Choose selection:'),
+                      ('TV-Y7', 'TV-Y7'),('TV-G', 'TV-G'),('TV-PG', 'TV-PG'),('TV-MA', 'TV-MA'),
+                      ('PG-13', 'PG-13'),('TV-14', 'TV-14'),('R', 'R'),('Not Rated', 'Not Rated'),
+                      ('Approved', 'Approved'), ]
+    add_rating = SelectField('Ratings', choices=choices_rating)
+    platform_choices = [('Choose selection:', 'Choose selection:'),
+                        ('Netflix', 'Netflix'),
+                        ('DisneyPlus', 'DisneyPlus'), ]
+    add_platform = SelectField("Platforms", choices=platform_choices, default=None)
+
+
+@app.route('/index2', methods=['GET', 'POST'])
+def index2():
+    search = MovieAddRatingForm(request.form)
+    if request.method == 'POST':
+        return insert(search)
+    return render_template('inserting_index.html', form=search)
+
+
 @app.route('/insert', methods = ['POST'])
-def insert():
+def insert(search):
     if request.method == "POST":
-        Category = request.form['Category']
-        Title = request.form['Title']
-        Country = request.form['Country']
-        ReleaseYear = request.form['ReleaseYear']
-        Duration = request.form['Duration']
-        Description = request.form['Description']
-        cursor.execute("INSERT INTO Movies (Category, Title, Country, ReleaseYear, Duration, Description) VALUES (%s, %s, %s, %s, %s, %s)", (Category, Title, Country, ReleaseYear, Duration, Description))
-        conn.commit()
-        return redirect(url_for('Movies'))
 
-        MovieId = cursor.lastrowid
+        if search.data['add_table'] == 'Recommendation':
+            title = request.form['add_rec_title']
+            user_rating = request.form['add_user_rating']
+            #need to add in conditional for if AtDeleted is null once update it is set up
+            cursor.execute("""SELECT * FROM Recommendations WHERE MovieID IN(SELECT MovieID
+                                                                           FROM Movies
+                                                                           WHERE Title = %s);""", (title,))
+            result = cursor.fetchall()
+            if cursor.rowcount != 0:
+                flash('Recommendation already exists!')
+                #can add to redirect to update
+                return redirect('/index2')
+            else:
+                cursor.execute("""INSERT INTO Recommendations(UserRating,MovieId)
+                                      SELECT %s, MovieId FROM Movies WHERE Title = %s;""", (user_rating, title,))
+                conn.commit()
+                flash("Recommendation Record Inserted Successfully")
+                return redirect('/Recommendations')
 
-        # Actors
-        ActorName = request.form['ActorName']
-        Gender = request.form['Gender']
-        Age = request.form['Age']
-        cursor.execute("INSERT INTO Actors(ActorName,Gender,Age)"
-                         "VALUES(%s,%s,%s);", (ActorName,Gender,Age))
-        conn.commit()
-        return redirect(url_for('Actors'))
+        elif search.data['add_table'] == 'Actor':
+            actor_name = request.form['add_actor_name']
+            actor_age = request.form['add_actor_age']
+            actor_gender = search.data['add_gender_actor']
+            cursor.execute("""SELECT *  FROM Actors WHERE ActorName = %s;""", (actor_name,))
+            result = cursor.fetchall()
+            if cursor.rowcount != 0:
+                flash('Actor already exists!')
+                return redirect('/index2')
+            else:
+                cursor.execute("""INSERT INTO Actors(ActorName,Age, Gender)
+                                      VALUES (%s, %s, %s);""", (actor_name, actor_age, actor_gender,))
+                conn.commit()
+                flash("Actor Record Inserted Successfully")
+                return redirect('/Actors')
 
-        """
-        # Directors
-        cursor.execute("INSERT INTO Directors(DirectorName,Gender,Age)"
-                         "VALUES(%s,%s,%s);", (DirectorName,Gender,Age))
-        conn.commit()
-        
-        # make sure other tables are updated with movie ID after inserting into movies
-        # Genres
-        cursor.execute("INSERT INTO Genres(MovieId, GenreType)"
-                         "VALUES(%s,%s);", (MovieId, GenreType))
-        conn.commit()
-        # Ratings
-        cursor.execute("INSERT INTO Ratings(MovieId, Rating)"
-                         "VALUES(%s,%s);", (MovieId, Rating))
-        conn.commit()
-        # Recommendations table is empty upon starting b/c user will input ratings later
-        # StreamingService
-        cursor.execute("INSERT INTO StreamingService(MovieId, Platform, DateAdded)"
-                         "VALUES(%s,%s,%s);", (MovieId, Platform, DateAdded))
-        conn.commit()
-       """
+        elif search.data['add_table'] == 'Director':
+            director_name = request.form['add_director_name']
+            director_age = request.form['add_director_age']
+            director_gender = search.data['add_gender_director']
+            cursor.execute("""SELECT *  FROM Directors WHERE DirectorName = %s;""", (director_name,))
+            result = cursor.fetchall()
+            if cursor.rowcount != 0:
+                flash('Director already exists!')
+                return redirect('/index2')
+            else:
+                cursor.execute("""INSERT INTO Directors(DirectorName, Age, Gender)
+                                      VALUES (%s, %s, %s);""", (director_name, director_age, director_gender,))
+                conn.commit()
+                flash("Director Record Inserted Successfully")
+                return redirect('/Directors')
 
+        elif search.data['add_table'] == 'Movie':
+            category = search.data['add_category']
+            title = request.form['add_movie_title']
+            country = request.form['add_country']
+            release_year = request.form['add_release_year']
+            duration = request.form['add_duration']
+            description = request.form['add_description']
+            genre = search.data['add_genre']
+            rating = search.data['add_rating']
+            platform = search.data['add_platform']
 
+            ###### Testing Triple Join #####
+            cursor.execute("""SELECT * FROM Movies 
+            INNER JOIN Genres ON Genres.MovieId = Movies.MovieId
+            INNER JOIN Ratings ON Ratings.MovieId = Genres.MovieId
+            INNER JOIN StreamingService ON Platform.MovieId = Ratings.MovieId
+            WHERE Category=%s,Title=%s,Country=%s,ReleaseYear=%s,Duration=%s,Description=%s,
+                    GenreType=%s,Rating=%s,Platform=%s;""",(category,title,country,release_year,duration,description,genre,rating,platform,))
+            result = cursor.fetchall()
+
+            if cursor.rowcount != 0:
+                flash('Movie/TV show already exists!')
+                return redirect('/index2')
+            else:
+                cursor.execute("""INSERT INTO Movies(Category, Title, Country, ReleaseYear, Duration, Description)
+                                                      VALUES (%s, %s, %s, %s, %s, %s);""",
+                               (category, title, country, release_year, duration, description,))
+                cursor.execute("""INSERT INTO Genres(GenreType,MovieId)
+                                                      SELECT %s, MovieId FROM Movies WHERE Title = %s;""",
+                               (genre, title,))
+                cursor.execute("""INSERT INTO Ratings(Rating,MovieId)
+                                                                  SELECT %s, MovieId FROM Movies WHERE Title = %s;""",
+                               (rating, title,))
+                cursor.execute("""INSERT INTO StreamingService(Platform,MovieId, DateAdded)
+                                                                  SELECT %s, MovieId, %s FROM Movies WHERE Title = %s;""",
+                               (platform, str(datetime.datetime.now()), title))
+                conn.commit()
+                flash("Movie Records Inserted Successfully")
+                return redirect('/Movies')
+###################################################################################
+
+########################## Updating ###############################################
 @app.route('/update',methods=['POST','GET'])
 def update():
     if request.method == 'POST':
@@ -208,23 +331,16 @@ def update():
         conn.commit()
         return redirect(url_for('Movies'))
 
-#########################################################################
+########################## Deleting ###############################################
+# set DeletedAt = current_date
 @app.route('/delete/<string:MovieId>', methods = ['GET'])
-def delete(MovieId):
-    cursor.execute("UPDATE Movies SET DeletedAt = current_date WHERE MovieId=%s", (MovieId,))
+def deleteMov(MovieId):
+    cursor.execute("""UPDATE Movies SET DeletedAt = current_date WHERE MovieId=%s;""", (MovieId,))
+    conn.commit()
     return redirect(url_for('Movies'))
-
-
-# @app.route('/delete', methods = ['POST','GET'])
-# def delete():
-#     if request.method == 'POST':
-#         TableName = request.form['TableName']
-#         if TableName == 'Movies':
-#             MovieId = request.form['MovieId']
-#             cursor.execute("UPDATE Movies SET DeletedAt = current_date WHERE MovieId=%s", (MovieId,))
-#             return redirect(url_for('Movies'))
 ##########################################################################
 
+########################## Exporting ###############################################
 @app.route('/export',methods=['POST','GET'])
 def export():
     if request.method == 'POST':
@@ -329,7 +445,7 @@ def export():
         else:
             return redirect(url_for('Movies'))
 
-# searching and filtering
+########################## Searching/Filtering ###############################################
 class MovieFilterForm(Form):
     choices_filter = [('Choose filter:', 'Choose filter:'),
                ('Rating', 'Rating'),
@@ -340,39 +456,19 @@ class MovieFilterForm(Form):
 
     # cursor.execute("""SELECT DISTINCT Rating FROM Ratings""")
     choices_rating = [('Choose Rating:', 'Choose Rating:'),
-                ('TV-Y7', 'TV-Y7'),
-                ('TV-G', 'TV-G'),
-                ('TV-PG', 'TV-PG'),
-                ('TV-MA', 'TV-MA'),
-                ('PG-13', 'PG-13'),
-                ('TV-14', 'TV-14'),
-                ('R', 'R'),
-                ('Not Rated', 'Not Rated'),
-                ('Approved', 'Approved'),]
+                ('TV-Y7', 'TV-Y7'),('TV-G', 'TV-G'),('TV-PG', 'TV-PG'),('TV-MA', 'TV-MA'),('PG-13', 'PG-13'),
+                      ('TV-14', 'TV-14'),('R', 'R'),('Not Rated', 'Not Rated'),('Approved', 'Approved'),]
     select_rating = SelectField('Ratings:', choices=choices_rating)
 
     choices_genre = [('Choose Genre:', 'Choose Genre:'),
-                ('Action', 'Action'),
-                ('Adventure', 'Adventure'),
-                ('Animation', 'Animation'),
-                ('Comedy', 'Comedy'),
-                ('Crime', 'Crime'),
-                ('Documentary', 'Documentary'),
-                ('Drama', 'Drama'),
-                ('Family', 'Family'),
-                ('Horror', 'Horror'),
-                ('Independent', 'Independent'),
-                ('International', 'International'),
-                ('Romance', 'Romance'),
-                ('Sci-Fi', 'Sci-Fi'),
-                ('Sport', 'Sport'),]
+                ('Action', 'Action'),('Adventure', 'Adventure'),('Animation', 'Animation'),('Comedy', 'Comedy'),
+                ('Crime', 'Crime'),('Documentary', 'Documentary'),('Drama', 'Drama'),('Family', 'Family'),
+                ('Horror', 'Horror'),('Independent', 'Independent'),('International', 'International'),
+                ('Romance', 'Romance'),('Sci-Fi', 'Sci-Fi'),('Sport', 'Sport'),]
     select_genre = SelectField('Genres:', choices=choices_genre)
 
-
     choices_category = [('Choose Category:', 'Choose Category:'),
-                ('Movie', 'Movie'),
-                ('TV Show', 'TV Show'),
-                ('Episode', 'Episode'),]
+                ('Movie', 'Movie'),('TV Show', 'TV Show'),('Episode', 'Episode'),]
     select_category = SelectField('Category:', choices=choices_category)
 
     choices_platform = [('Choose Platform:', 'Choose Platform:'),
