@@ -203,8 +203,7 @@ class MovieAddRatingForm(Form):
                       ('Approved', 'Approved'), ]
     add_rating = SelectField('Ratings', choices=choices_rating)
     platform_choices = [('Choose selection:', 'Choose selection:'),
-                        ('Netflix', 'Netflix'),
-                        ('DisneyPlus', 'DisneyPlus'), ]
+                        ('Netflix', 'Netflix'),('Disney Plus', 'Disney Plus'),('Hulu', 'Hulu'), ]
     add_platform = SelectField("Platforms", choices=platform_choices, default=None)
 
 
@@ -283,33 +282,33 @@ def insert(search):
             platform = search.data['add_platform']
 
             ###### Testing Triple Join #####
-            cursor.execute("""SELECT * FROM Movies 
-            INNER JOIN Genres ON Genres.MovieId = Movies.MovieId
-            INNER JOIN Ratings ON Ratings.MovieId = Genres.MovieId
-            INNER JOIN StreamingService ON Platform.MovieId = Ratings.MovieId
-            WHERE Category=%s,Title=%s,Country=%s,ReleaseYear=%s,Duration=%s,Description=%s,
-                    GenreType=%s,Rating=%s,Platform=%s;""",(category,title,country,release_year,duration,description,genre,rating,platform,))
-            result = cursor.fetchall()
-
-            if cursor.rowcount != 0:
-                flash('Movie/TV show already exists!')
-                return redirect('/index2')
-            else:
-                cursor.execute("""INSERT INTO Movies(Category, Title, Country, ReleaseYear, Duration, Description)
-                                                      VALUES (%s, %s, %s, %s, %s, %s);""",
-                               (category, title, country, release_year, duration, description,))
-                cursor.execute("""INSERT INTO Genres(GenreType,MovieId)
-                                                      SELECT %s, MovieId FROM Movies WHERE Title = %s;""",
-                               (genre, title,))
-                cursor.execute("""INSERT INTO Ratings(Rating,MovieId)
-                                                                  SELECT %s, MovieId FROM Movies WHERE Title = %s;""",
-                               (rating, title,))
-                cursor.execute("""INSERT INTO StreamingService(Platform,MovieId, DateAdded)
-                                                                  SELECT %s, MovieId, %s FROM Movies WHERE Title = %s;""",
-                               (platform, str(datetime.datetime.now()), title))
-                conn.commit()
-                flash("Movie Records Inserted Successfully")
-                return redirect('/Movies')
+            # cursor.execute("""SELECT * FROM Movies
+            # INNER JOIN Genres ON Genres.MovieId = Movies.MovieId
+            # INNER JOIN Ratings ON Ratings.MovieId = Genres.MovieId
+            # INNER JOIN StreamingService ON Platform.MovieId = Ratings.MovieId
+            # WHERE Category=%s,Title=%s,Country=%s,ReleaseYear=%s,Duration=%s,Description=%s,
+            #         GenreType=%s,Rating=%s,Platform=%s;""",(category,title,country,release_year,duration,description,genre,rating,platform,))
+            # result = cursor.fetchall()
+            #
+            # if cursor.rowcount != 0:
+            #     flash('Movie/TV show already exists!')
+            #     return redirect('/index2')
+            # else:
+            cursor.execute("""INSERT INTO Movies(Category, Title, Country, ReleaseYear, Duration, Description)
+                                                  VALUES (%s, %s, %s, %s, %s, %s);""",
+                           (category, title, country, release_year, duration, description,))
+            cursor.execute("""INSERT INTO Genres(GenreType,MovieId)
+                                                  SELECT %s, MovieId FROM Movies WHERE Title = %s;""",
+                           (genre, title,))
+            cursor.execute("""INSERT INTO Ratings(Rating,MovieId)
+                                                              SELECT %s, MovieId FROM Movies WHERE Title = %s;""",
+                           (rating, title,))
+            cursor.execute("""INSERT INTO StreamingService(Platform,MovieId, DateAdded)
+                                                              SELECT %s, MovieId, %s FROM Movies WHERE Title = %s;""",
+                           (platform, str(datetime.datetime.now()), title))
+            conn.commit()
+            flash("Movie Records Inserted Successfully")
+            return redirect('/Movies')
 ###################################################################################
 
 ########################## Updating ###############################################
@@ -472,8 +471,7 @@ class MovieFilterForm(Form):
     select_category = SelectField('Category:', choices=choices_category)
 
     choices_platform = [('Choose Platform:', 'Choose Platform:'),
-                        ('Netflix', 'Netflix'),
-                        ('DisneyPlus', 'DisneyPlus'), ]
+                        ('Netflix', 'Netflix'),('Disney Plus', 'Disney Plus'),('Hulu', 'Hulu'), ]
     select_platform = SelectField('Platform:', choices=choices_platform)
 
     choices_search = [('Title', 'Title'),
