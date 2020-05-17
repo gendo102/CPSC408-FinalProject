@@ -75,6 +75,13 @@ body {
   list-style: none;
 }
 
+.filtering li {
+  display: inline-block;
+  margin-left: 30px;
+  padding-top: 10px;
+  position: relative;
+}
+
 .filtering a{
   color: #ff0f01;
   text-decoration: none;
@@ -124,7 +131,8 @@ body {
 <div class = "filtering">
     <nav align="center">
         <ul>
-<li><a href="{{ url_for('index') }}">Filtering</a></li>
+            <li><a href="{{ url_for('index2') }}">Insert New Record</a></li>
+            <li><a href="{{ url_for('index') }}">Filtering</a></li>
         </ul>
     </nav>
   </div>
