@@ -151,7 +151,7 @@ class MovieAddRatingForm(Form):
                       ('User Rating', 'User Rating'),
                       ('Actor', 'Actor'),
                       ('Director', 'Director'),
-                     ('Movie', 'Movie'), ]
+                     ('Movie/TV Show/Episode', 'Movie/TV Show/Episode'), ]
     add_table = SelectField('', choices=table_choices, default=None)
 
     ###RECOMMENDATIONS
@@ -181,7 +181,7 @@ class MovieAddRatingForm(Form):
     add_gender_director = SelectField("Gender", choices=user_gender_choices, default=None)
 
 
-    ###MOVIE
+    ###MOVIE/TV SHPOW/EPISODE
     category_choices = [('Choose selection:', 'Choose selection:'),
                            ('Movie', 'Movie'),
                            ('TV Show', 'TV Show'),
@@ -282,6 +282,7 @@ def insert(search):
             rating = search.data['add_rating']
             platform = search.data['add_platform']
 
+            ###### Testing Triple Join #####
             cursor.execute("""SELECT * FROM Movies
                                 INNER JOIN Genres ON(Movies.MovieId = Genres.MovieId)
                                 INNER JOIN Ratings ON(Movies.MovieId = Ratings.MovieId)
@@ -290,7 +291,7 @@ def insert(search):
             result = cursor.fetchall()
 
             if cursor.rowcount != 0:
-                flash('Movie/TV show already exists!')
+                flash('Movie/TV/Episode show already exists!')
                 return redirect('/index2')
             else:
                 cursor.execute("""INSERT INTO Movies(Category, Title, Country, ReleaseYear, Duration, Description)
@@ -306,7 +307,7 @@ def insert(search):
                                                               SELECT %s, MovieId, %s FROM Movies WHERE Title = %s;""",
                            (platform, str(datetime.datetime.now()), title))
                 conn.commit()
-                flash("Movie Records Inserted Successfully")
+                flash("Movie/TV Show/Episode Records Inserted Successfully")
                 return redirect('/Movies')
 ###################################################################################
 
@@ -334,6 +335,10 @@ def update():
 @app.route('/delete/<string:MovieId>', methods = ['GET'])
 def deleteMov(MovieId):
     cursor.execute("""UPDATE Movies SET DeletedAt = current_date WHERE MovieId=%s;""", (MovieId,))
+    cursor.execute("""UPDATE Genres SET DeletedAt = current_date WHERE MovieId=%s;""", (MovieId,))
+    cursor.execute("""UPDATE Ratings SET DeletedAt = current_date WHERE MovieId=%s;""", (MovieId,))
+    cursor.execute("""UPDATE Recommendations SET DeletedAt = current_date WHERE MovieId=%s;""", (MovieId,))
+    cursor.execute("""UPDATE StreamingService SET DeletedAt = current_date WHERE MovieId=%s;""", (MovieId,))
     conn.commit()
     return redirect(url_for('Movies'))
 ##########################################################################
