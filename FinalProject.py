@@ -8,9 +8,8 @@ import datetime
 
 app = Flask(__name__, template_folder="Templates")
 
-app = Flask(__name__, template_folder="templates")
 app.secret_key = '701701'
-conn = pymysql.connect("34.83.209.196","root","PASSWORD","FINALPROJECT")
+conn = pymysql.connect("34.83.8.98","root","PASSWORD","FinalProject")
 cursor = conn.cursor()
 
 @app.route('/', methods=['GET', 'POST'])
@@ -341,6 +340,18 @@ def deleteMov(MovieId):
     cursor.execute("""UPDATE StreamingService SET DeletedAt = current_date WHERE MovieId=%s;""", (MovieId,))
     conn.commit()
     return redirect(url_for('Movies'))
+
+@app.route('/deleteAct/<string:ActorId>', methods = ['GET'])
+def deleteAct(ActorId):
+    cursor.execute("""UPDATE Actors SET DeletedAt = current_date WHERE ActorId=%s;""", (ActorId,))
+    conn.commit()
+    return redirect(url_for('Actors'))
+
+@app.route('/deleteDir/<string:DirectorId>', methods = ['GET'])
+def deleteDir(DirectorId):
+    cursor.execute("""UPDATE Directors SET DeletedAt = current_date WHERE DirectorId=%s;""", (DirectorId,))
+    conn.commit()
+    return redirect(url_for('Directors'))
 ##########################################################################
 
 ########################## Exporting ###############################################
