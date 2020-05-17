@@ -8,8 +8,9 @@ import datetime
 
 app = Flask(__name__, template_folder="Templates")
 
+app = Flask(__name__, template_folder="templates")
 app.secret_key = '701701'
-conn = pymysql.connect("34.83.8.98","root","Hk1ru0HoKkjjzKzv","FinalProject")
+conn = pymysql.connect("34.83.209.196","root","PASSWORD","FINALPROJECT")
 cursor = conn.cursor()
 
 @app.route('/', methods=['GET', 'POST'])
@@ -219,7 +220,7 @@ def index2():
 def insert(search):
     if request.method == "POST":
 
-        if search.data['add_table'] == 'Recommendation':
+        if search.data['add_table'] == 'User Rating':
             title = request.form['add_rec_title']
             user_rating = request.form['add_user_rating']
             #need to add in conditional for if AtDeleted is null once update it is set up
@@ -236,7 +237,7 @@ def insert(search):
                                       SELECT %s, MovieId FROM Movies WHERE Title = %s;""", (user_rating, title,))
                 conn.commit()
                 flash("Recommendation Record Inserted Successfully")
-                return redirect('/Recommendations')
+                return redirect('/index2')
 
         elif search.data['add_table'] == 'Actor':
             actor_name = request.form['add_actor_name']
@@ -281,34 +282,32 @@ def insert(search):
             rating = search.data['add_rating']
             platform = search.data['add_platform']
 
-            ###### Testing Triple Join #####
-            # cursor.execute("""SELECT * FROM Movies
-            # INNER JOIN Genres ON Genres.MovieId = Movies.MovieId
-            # INNER JOIN Ratings ON Ratings.MovieId = Genres.MovieId
-            # INNER JOIN StreamingService ON Platform.MovieId = Ratings.MovieId
-            # WHERE Category=%s,Title=%s,Country=%s,ReleaseYear=%s,Duration=%s,Description=%s,
-            #         GenreType=%s,Rating=%s,Platform=%s;""",(category,title,country,release_year,duration,description,genre,rating,platform,))
-            # result = cursor.fetchall()
-            #
-            # if cursor.rowcount != 0:
-            #     flash('Movie/TV show already exists!')
-            #     return redirect('/index2')
-            # else:
-            cursor.execute("""INSERT INTO Movies(Category, Title, Country, ReleaseYear, Duration, Description)
+            cursor.execute("""SELECT * FROM Movies
+                                INNER JOIN Genres ON(Movies.MovieId = Genres.MovieId)
+                                INNER JOIN Ratings ON(Movies.MovieId = Ratings.MovieId)
+                                INNER JOIN StreamingService on (StreamingService.MovieId= Movies.MovieId)
+                                WHERE Title = %s;""",(title,))
+            result = cursor.fetchall()
+
+            if cursor.rowcount != 0:
+                flash('Movie/TV show already exists!')
+                return redirect('/index2')
+            else:
+                cursor.execute("""INSERT INTO Movies(Category, Title, Country, ReleaseYear, Duration, Description)
                                                   VALUES (%s, %s, %s, %s, %s, %s);""",
                            (category, title, country, release_year, duration, description,))
-            cursor.execute("""INSERT INTO Genres(GenreType,MovieId)
+                cursor.execute("""INSERT INTO Genres(GenreType,MovieId)
                                                   SELECT %s, MovieId FROM Movies WHERE Title = %s;""",
                            (genre, title,))
-            cursor.execute("""INSERT INTO Ratings(Rating,MovieId)
+                cursor.execute("""INSERT INTO Ratings(Rating,MovieId)
                                                               SELECT %s, MovieId FROM Movies WHERE Title = %s;""",
                            (rating, title,))
-            cursor.execute("""INSERT INTO StreamingService(Platform,MovieId, DateAdded)
+                cursor.execute("""INSERT INTO StreamingService(Platform,MovieId, DateAdded)
                                                               SELECT %s, MovieId, %s FROM Movies WHERE Title = %s;""",
                            (platform, str(datetime.datetime.now()), title))
-            conn.commit()
-            flash("Movie Records Inserted Successfully")
-            return redirect('/Movies')
+                conn.commit()
+                flash("Movie Records Inserted Successfully")
+                return redirect('/Movies')
 ###################################################################################
 
 ########################## Updating ###############################################
