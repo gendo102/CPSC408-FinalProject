@@ -1,15 +1,17 @@
 from flask import Flask, render_template, request, redirect, url_for, Response, flash
-from wtforms import Form, StringField, SelectField
+from wtforms import Form, StringField, SelectField, widgets, SelectMultipleField
+from flask_wtf import FlaskForm
 import os
 import pymysql
 import io
 import csv
 import datetime
 
-app = Flask(__name__, template_folder="Templates")
 
+
+app = Flask(__name__, template_folder="templates")
 app.secret_key = '701701'
-conn = pymysql.connect("34.83.8.98","root","PASSWORD","FinalProject")
+conn = pymysql.connect("34.83.209.196","root","Ktggym98","FINALPROJECT")
 cursor = conn.cursor()
 
 @app.route('/', methods=['GET', 'POST'])
@@ -174,7 +176,7 @@ class MovieAddRatingForm(Form):
     ###DIRECTORS
     add_director_name = StringField("Name", '', default=None)
     add_director_age = StringField("Age", '', default=None)
-    user_gender_choices = [('Choose selection:', 'Choose selection:'),
+    user_gender_choices = [('Choose selection:', 'Choose Choose selection:'),
                            ('M', 'M'),
                            ('F', 'F'), ]
     add_gender_director = SelectField("Gender", choices=user_gender_choices, default=None)
@@ -218,6 +220,7 @@ def index2():
 @app.route('/insert', methods = ['POST'])
 def insert(search):
     if request.method == "POST":
+
         if search.data['add_table'] == 'User Rating':
             title = request.form['add_rec_title']
             user_rating = request.form['add_user_rating']
@@ -269,7 +272,7 @@ def insert(search):
                 flash("Director Record Inserted Successfully")
                 return redirect('/Directors')
 
-        elif search.data['add_table'] == 'Movie/TV Show/Episode':
+        elif search.data['add_table'] == 'Movie':
             category = search.data['add_category']
             title = request.form['add_movie_title']
             country = request.form['add_country']
@@ -307,9 +310,6 @@ def insert(search):
                 conn.commit()
                 flash("Movie/TV Show/Episode Records Inserted Successfully")
                 return redirect('/Movies')
-        else:
-            conn.rollback()
-            return ('Rollback')
 ###################################################################################
 
 ########################## Updating ###############################################
@@ -467,168 +467,203 @@ def export():
             return redirect(url_for('Movies'))
 
 ########################## Searching/Filtering ###############################################
-class MovieFilterForm(Form):
-    choices_filter = [('Choose filter:', 'Choose filter:'),
-               ('Rating', 'Rating'),
-               ('Genre', 'Genre'),
-               ('Category', 'Category'),
-               ('Streaming Service', 'Streaming Service'),]
-    select_filter = SelectField('Filter movies by:', choices=choices_filter)
+class MultiCheckboxField(SelectMultipleField):
+    widget = widgets.ListWidget(prefix_label=False)
+    option_widget = widgets.CheckboxInput()
 
-    # cursor.execute("""SELECT DISTINCT Rating FROM Ratings""")
-    choices_rating = [('Choose Rating:', 'Choose Rating:'),
-                ('TV-Y7', 'TV-Y7'),('TV-G', 'TV-G'),('TV-PG', 'TV-PG'),('TV-MA', 'TV-MA'),('PG-13', 'PG-13'),
-                      ('TV-14', 'TV-14'),('R', 'R'),('Not Rated', 'Not Rated'),('Approved', 'Approved'),]
-    select_rating = SelectField('Ratings:', choices=choices_rating)
 
-    choices_genre = [('Choose Genre:', 'Choose Genre:'),
-                ('Action', 'Action'),('Adventure', 'Adventure'),('Animation', 'Animation'),('Comedy', 'Comedy'),
-                ('Crime', 'Crime'),('Documentary', 'Documentary'),('Drama', 'Drama'),('Family', 'Family'),
-                ('Horror', 'Horror'),('Independent', 'Independent'),('International', 'International'),
-                ('Romance', 'Romance'),('Sci-Fi', 'Sci-Fi'),('Sport', 'Sport'),]
-    select_genre = SelectField('Genres:', choices=choices_genre)
+class SimpleForm(FlaskForm):
+    ###CATEGORIES
+    string_of_categories = ['Movie\r\nTV_Show\r\nEpisode\r\n']
+    list_of_categories = string_of_categories[0].split()
+    # create a list of value/description tuples
+    categories_files = [(x, x) for x in list_of_categories]
+    categories_enter = MultiCheckboxField(choices=categories_files)
 
-    choices_category = [('Choose Category:', 'Choose Category:'),
-                ('Movie', 'Movie'),('TV Show', 'TV Show'),('Episode', 'Episode'),]
-    select_category = SelectField('Category:', choices=choices_category)
+    ###TV RATINGS
+    string_of_ratings = ['TV-Y7\r\nTV-G\r\nTV-PG\r\nTV-MA\r\nPG-13\r\nTV-14\r\nR\r\nNot-Rated\r\nApproved\r\n']
+    list_of_ratings = string_of_ratings[0].split()
+    # create a list of value/description tuples
+    ratings_files = [(x, x) for x in list_of_ratings]
+    ratings_enter = MultiCheckboxField('Label', choices=ratings_files)
 
-    choices_platform = [('Choose Platform:', 'Choose Platform:'),
-                        ('Netflix', 'Netflix'),('Disney Plus', 'Disney Plus'),('Hulu', 'Hulu'), ]
-    select_platform = SelectField('Platform:', choices=choices_platform)
+    ###COUNTRIES
+    string_of_countries = [
+        'Argentina\r\nAustralia\r\nAustria\r\nBrazil\r\nBulgaria\r\nCanada\r\nChile\r\nChina\r\nColombia\r\n'
+        'Denmark\r\nEgypt\r\nFinland\r\nFrance\r\nGermany\r\nHong Kong\r\nHungary\r\nIndia\r\nIreland\r\n'
+        'Israel\r\nItaly\r\nJapan\r\nMexico\r\nNetherlands\r\nNew_Zealand\r\nNigeria\r\nNorway\r\nPakistan\r\nPeru\r\n'
+        'Philippines\r\nRomania\r\nSouth Korea\r\nSpain\r\nSweden\r\nSwitzerland\r\nTanzania\r\nThailand\r\n'
+        'Turkey\r\nUnited_Kingdom\r\nUnited_States\r\nVietnam\r\n']
+    list_of_countries = string_of_countries[0].split()
+    # create a list of value/description tuples
+    countries_files = [(x, x) for x in list_of_countries]
+    countries_enter = MultiCheckboxField('Label', choices=countries_files)
 
-    choices_search = [('Title', 'Title'),
-               ('Year', 'Year'),
-               ('Actor', 'Actor'),
-               ('Director', 'Director'),
-               ('Country', 'Country'),]
+    ###USER RATINGS
+    string_of_user_rating = ['1\r\n2\r\n3\r\n4\r\n5\r\n']
+    list_of_user_rating = string_of_user_rating[0].split()
+    # create a list of value/description tuples
+    files = [(x, x) for x in list_of_user_rating]
+    user_rating_enter = MultiCheckboxField('Label', choices=files)
+
+    ###GENRES
+    string_of_genres = [
+        'Action\r\nAdventure\r\nAnimation\r\nComedies\r\nCrime\r\nDocumentaries\r\nDramas\r\nFamily\r\nHorror\r\nIndependent\r\nRomantic\r\nSci-Fi\r\nSports\r\n']
+    list_of_genres = string_of_genres[0].split()
+    # create a list of value/description tuples
+    genre_files = [(x, x) for x in list_of_genres]
+    genre_enter = MultiCheckboxField('Label', choices=genre_files)
+
+    ###STREAMING SERVICES
+    string_of_platforms = ['Netflix\r\nDisney+\r\nHulu\r\n']
+    list_of_platforms = string_of_platforms[0].split()
+    # create a list of value/description tuples
+    platforms_files = [(x, x) for x in list_of_platforms]
+    platforms_enter = MultiCheckboxField('Label', choices=platforms_files)
+
+    ###SEARCHING
+    choices_search = [('Choose from the following: ', 'Choose from the following:'),
+                      ('Title', 'Title'),
+                      ('Year', 'Year'),
+                      ('Actor', 'Actor'),
+                      ('Director', 'Director')]
     search_options = SelectField('Search for:', choices=choices_search)
     search_field = StringField('')
 
-@app.route('/index', methods=['GET', 'POST'])
+
+@app.route('/', methods=['post', 'get'])
 def index():
-    search = MovieFilterForm(request.form)
-    if request.method == 'POST':
-        return search_results(search)
-    return render_template('filter_index.html', form=search)
+    form = SimpleForm()
+    if form.validate_on_submit():
 
-
-@app.route('/search_results', methods=['GET', 'POST'])
-def search_results(search):
-   # search_string = search.data['search']
-   # if search_string:
-    if search.data['select_filter'] == 'Rating':
-        search_string = search.data['select_rating']
-        cursor.execute("""SELECT *  FROM Movies WHERE MovieID IN(SELECT MovieID 
-                                                                    FROM Ratings
-                                                                    WHERE Rating = %s) AND DeletedAt IS NULL 
-                                                                    ORDER BY Title;""", (search_string,))
-
-        result = cursor.fetchall()
-
-        if cursor.rowcount == 0:
-            flash('No results found!')
-            return redirect('/index')
+        ###CATEGORIES
+        if not form.categories_enter.data:
+            categories = ['Movie', 'TV Show', 'Episode']
+        elif form.categories_enter.data == ['TV_Show']:
+            categories = ['TV Show']
         else:
-            return render_template('movie_search_results.html', result=result, content_type = 'application/json')
+            categories = form.categories_enter.data
 
-
-    elif search.data['select_filter'] == 'Genre':
-        search_string = "%" + request.form['select_genre'] + "%"
-       # likeString = "'%" + search_string + "%'"
-        cursor.execute("""SELECT *  FROM Movies WHERE MovieID IN(SELECT MovieID 
-                                                                       FROM Genres
-                                                                       WHERE GenreType LIKE %s) AND DeletedAt IS NULL 
-                                                                       ORDER BY Title;""", (search_string,))
-
-        result = cursor.fetchall()
-
-        if cursor.rowcount == 0:
-            flash('No results found!')
-            return redirect('/index')
+        ###TV RATINGS
+        if not form.ratings_enter.data:
+            entered_ratings = ['TV-Y7', 'TV-G', 'TV-PG', 'TV-MA', 'PG-13', 'TV-14', 'R', 'Not Rated', 'Approved']
         else:
-            return render_template('movie_search_results.html', result=result, content_type='application/json')
+            entered_ratings = form.ratings_enter.data
 
-    elif search.data['select_filter'] == 'Category':
-        search_string = "%" + request.form['select_category'] + "%"
-        cursor.execute("""SELECT *  FROM Movies WHERE Category LIKE %s AND DeletedAt IS NULL 
-                                                                          ORDER BY Title;""", (search_string,))
-
-        result = cursor.fetchall()
-
-        if cursor.rowcount == 0:
-            flash('No results found!')
-            return redirect('/index')
+        ###COUNTRIES
+        if not form.countries_enter.data:
+            entered_country = ['Argentina', 'Australia', 'Austria', 'Brazil', 'Bulgaria', 'Canada',
+                               'Chile', 'China', 'Colombia', 'Denmark', 'Denmark', 'Egypt', 'Finland', 'France',
+                               'Germany', 'Hong Kong', 'Hungary', 'India', 'Ireland', 'Israel', 'Italy', 'Japan',
+                               'Mexico', 'Netherlands', 'New Zealand', 'Nigeria', 'Norway', 'Pakistan', 'Peru',
+                               'Philippines',
+                               'Romania', 'South Korea', 'Spain', 'Sweden', 'Switzerland', 'Tanzania', 'Thailand',
+                               'Turkey', 'United Kingdom', 'United States', 'Vietnam']
+        elif form.countries_enter.data == ['New_Zealand']:
+            entered_country = ['New Zealand']
+        elif form.countries_enter.data == ['United_Kingdom']:
+            entered_country = ['United Kingdom', 'UK']
+        elif form.countries_enter.data == ['United_States']:
+            entered_country = ['United States', 'USA']
         else:
-            return render_template('movie_search_results.html', result=result, content_type='application/json')
+            entered_country = form.countries_enter.data
 
-    elif search.data['select_filter'] == 'Streaming Service':
-        search_string = search.data['select_platform']
-        cursor.execute("""SELECT *  FROM Movies WHERE MovieID IN(SELECT MovieID 
-                                                                       FROM StreamingService
-                                                                       WHERE Platform = %s) AND DeletedAt IS NULL 
-                                                                       ORDER BY Title;""", (search_string,))
-
-        result = cursor.fetchall()
-
-        if cursor.rowcount == 0:
-            flash('No results found!')
-            return redirect('/index')
+        ###USER RATING
+        if not form.user_rating_enter.data:
+            user_rating = ['1', '2', '3', '4', '5']
         else:
-            return render_template('movie_search_results.html', result=result, content_type='application/json')
+            user_rating = form.user_rating_enter.data
 
-    elif search.data['search_options'] == 'Title':
-        search_string = "%" + request.form['search_field'] + "%"
-        cursor.execute("""SELECT * FROM Movies WHERE Title LIKE %s;""", (search_string,))
-        result = cursor.fetchall()
-        if cursor.rowcount == 0:
-            flash('No results found!')
-            return redirect('/index')
+        ###STREAMING SERVICES
+        if not form.platforms_enter.data:
+            platforms = ['Netflix', 'Disney Plus', 'Hulu']
+        elif form.platforms_enter.data == ['Disney+']:
+            platforms = ['Disney Plus']
         else:
-            return render_template('movie_search_results.html', result=result, content_type='application/json')
+            platforms = form.platforms_enter.data
 
-    elif search.data['search_options'] == 'Year':
-        search_string = "%" + request.form['search_field'] + "%"
-        cursor.execute("""SELECT * FROM Movies WHERE ReleaseYear LIKE %s;""", (search_string,))
-        result = cursor.fetchall()
-        if cursor.rowcount == 0:
-            flash('No results found!')
-            return redirect('/index')
-        else:
-            return render_template('movie_search_results.html', result=result, content_type='application/json')
+        # not sure what to do if user does not enter in a value
+        # if form.genre_enter.data == []:
+        #   genre = ['%Comedy%']
+        # elif form.genre_enter.data != []:
+        #   genre = "%" + form.genre_enter.data[0] + "%"
 
-    elif search.data['search_options'] == 'Actor':
-        search_string = "%" + request.form['search_field'] + "%"
-        cursor.execute("""SELECT * FROM Actors WHERE ActorName LIKE %s;""", (search_string,))
-        result = cursor.fetchall()
-        if cursor.rowcount == 0:
-            flash('No results found!')
-            return redirect('/index')
-        else:
-            return render_template('person_search_results.html', result=result, content_type='application/json')
+        if request.form['search_options'] == 'Title':
+            search_string = "%" + request.form['search_field'] + "%"
+            cursor.execute("""SELECT Movies.*, GenreType, Rating, Platform, DateAdded, UserRating FROM Movies LEFT JOIN Genres ON (Movies.MovieId = Genres.MovieId) LEFT JOIN Ratings ON (Movies.MovieId = Ratings.MovieId) LEFT JOIN StreamingService ON (StreamingService.MovieId= Movies.MovieId) LEFT JOIN Recommendations ON (Recommendations.MovieId= Movies.MovieId) WHERE Title LIKE %s;""",
+                (search_string,))
+            result = cursor.fetchall()
+            if cursor.rowcount == 0:
+                flash('No results found!')
+                return redirect('/index')
+            else:
+                return render_template('complete_movie_search_results.html', result=result, content_type='application/json')
 
-    elif search.data['search_options'] == 'Director':
-        search_string = "%" + request.form['search_field'] + "%"
-        cursor.execute("""SELECT * FROM Directors WHERE DirectorName LIKE %s;""", (search_string,))
-        result = cursor.fetchall()
-        if cursor.rowcount == 0:
-            flash('No results found!')
-            return redirect('/index')
-        else:
-            return render_template('person_search_results.html', result=result, content_type='application/json')
+        elif request.form['search_options'] == 'Year':
+            search_string = "%" + request.form['search_field'] + "%"
+            cursor.execute("""SELECT Movies.*, GenreType, Rating, Platform, DateAdded, UserRating FROM Movies LEFT JOIN Genres ON (Movies.MovieId = Genres.MovieId) LEFT JOIN Ratings ON (Movies.MovieId = Ratings.MovieId) LEFT JOIN StreamingService ON (StreamingService.MovieId= Movies.MovieId) LEFT JOIN Recommendations ON (Recommendations.MovieId= Movies.MovieId) WHERE ReleaseYear LIKE %s;""",
+                (search_string,))
+            result = cursor.fetchall()
+            if cursor.rowcount == 0:
+                flash('No results found!')
+                return redirect('/index')
+            else:
+                return render_template('complete_movie_search_results.html', result=result, content_type='application/json')
 
-    elif search.data['search_options'] == 'Country':
-        search_string = "%" + request.form['search_field'] + "%"
-        cursor.execute("""SELECT * FROM Movies WHERE Country LIKE %s;""", (search_string,))
-        result = cursor.fetchall()
-        if cursor.rowcount == 0:
-            flash('No results found!')
-            return redirect('/index')
+        elif request.form['search_options'] == 'Actor':
+            search_string = "%" + request.form['search_field'] + "%"
+            cursor.execute("""SELECT * FROM Actors WHERE ActorName LIKE %s;""", (search_string,))
+            result = cursor.fetchall()
+            if cursor.rowcount == 0:
+                flash('No results found!')
+                return redirect('/index')
+            else:
+                return render_template('person_search_results.html', result=result, content_type='application/json')
+
+        elif request.form['search_options'] == 'Director':
+            search_string = "%" + request.form['search_field'] + "%"
+            cursor.execute("""SELECT * FROM Directors WHERE DirectorName LIKE %s;""", (search_string,))
+            result = cursor.fetchall()
+            if cursor.rowcount == 0:
+                flash('No results found!')
+                return redirect('/index')
+            else:
+                return render_template('person_search_results.html', result=result, content_type='application/json')
         else:
-            return render_template('movie_search_results.html', result=result, content_type='application/json')
+
+            ##QUERY that includes user rating
+            # cursor.execute("SELECT Movies.*, GenreType, Rating, Platform, DateAdded, UserRating FROM Movies LEFT JOIN Genres ON (Movies.MovieId = Genres.MovieId) LEFT JOIN Ratings ON (Movies.MovieId = Ratings.MovieId) LEFT JOIN StreamingService ON (StreamingService.MovieId= Movies.MovieId) LEFT JOIN Recommendations ON (Recommendations.MovieId= Movies.MovieId) WHERE Category IN ({}) AND Platform IN ({}) AND Rating IN ({}) AND UserRating IN ({}) AND Country IN ({})".format(str(categories)[1:-1], str(platforms)[1:-1], str(entered_ratings)[1:-1], str(user_rating)[1:-1], str(entered_country)[1:-1]))
+
+            ##QUERY that includes genre (limited to 1)
+            # cursor.execute("SELECT Movies.*, GenreType, Rating, Platform, DateAdded, UserRating FROM Movies LEFT JOIN Genres ON (Movies.MovieId = Genres.MovieId) LEFT JOIN Ratings ON (Movies.MovieId = Ratings.MovieId) LEFT JOIN StreamingService ON (StreamingService.MovieId= Movies.MovieId) LEFT JOIN Recommendations ON (Recommendations.MovieId= Movies.MovieId) WHERE Category IN ({}) AND Platform IN ({}) AND Rating IN ({})  AND Country IN ({}) AND GenreType LIKE %s".format(str(categories)[1:-1], str(platforms)[1:-1], str(entered_ratings)[1:-1], str(entered_country)[1:-1]), (genre,))
+
+            ###Query that includes countries but doesn't work correctly because of how data is stored
+            # cursor.execute("SELECT Movies.*, GenreType, Rating, Platform, DateAdded, UserRating FROM Movies LEFT JOIN Genres ON (Movies.MovieId = Genres.MovieId) LEFT JOIN Ratings ON (Movies.MovieId = Ratings.MovieId) LEFT JOIN StreamingService ON (StreamingService.MovieId= Movies.MovieId) LEFT JOIN Recommendations ON (Recommendations.MovieId= Movies.MovieId) WHERE Category IN ({}) AND Platform IN ({}) AND Rating IN ({}) AND Country IN ({})".format(str(categories)[1:-1], str(platforms)[1:-1], str(entered_ratings)[1:-1], str(entered_country)[1:-1]))
+
+            cursor.execute(
+                "SELECT Movies.*, GenreType, Rating, Platform, DateAdded, UserRating FROM Movies LEFT JOIN Genres ON (Movies.MovieId = Genres.MovieId) LEFT JOIN Ratings ON (Movies.MovieId = Ratings.MovieId) LEFT JOIN StreamingService ON (StreamingService.MovieId= Movies.MovieId) LEFT JOIN Recommendations ON (Recommendations.MovieId= Movies.MovieId) WHERE Category IN ({}) AND Platform IN ({}) AND Rating IN ({})".format(
+                    str(categories)[1:-1], str(platforms)[1:-1], str(entered_ratings)[1:-1]))
+            result = cursor.fetchall()
+            # return render_template('complete_movie_search_results.html', result=result, content_type='application/json')
+            if cursor.rowcount == 0:
+                flash('No results found!')
+                return redirect('/')
+            else:
+                return render_template('complete_movie_search_results.html', result=result, content_type='application/json')
+
+    # cursor.execute( "SELECT Movies.*, GenreType, Rating, Platform, DateAdded, UserRating FROM Movies LEFT JOIN Genres ON (Movies.MovieId = Genres.MovieId) LEFT JOIN Ratings ON (Movies.MovieId = Ratings.MovieId) LEFT JOIN StreamingService ON (StreamingService.MovieId= Movies.MovieId) LEFT JOIN Recommendations ON (Recommendations.MovieId= Movies.MovieId) WHERE Category IN ({}) AND Platform IN ({}) AND Rating IN ({})".format(
+    #             str(categories)[1:-1], str(platforms)[1:-1], str(entered_ratings)[1:-1]))
+
+    #     result = cursor.fetchall()
+    # return render_template('complete_movie_search_results.html', result=result, content_type='application/json')
+    #     if cursor.rowcount == 0:
+    #         flash('No results found!')
+    #         return redirect('/')
+    #    else:
+    #        return render_template('complete_movie_search_results.html', result=result, content_type='application/json')
 
     else:
-        flash('No results found!')
-        return redirect('/index')
+        return render_template('filter_index.html', form=form)
 
 # Main method
 if __name__ == '__main__':
