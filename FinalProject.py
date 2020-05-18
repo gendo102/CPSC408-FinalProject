@@ -174,7 +174,7 @@ class MovieAddRatingForm(Form):
     ###DIRECTORS
     add_director_name = StringField("Name", '', default=None)
     add_director_age = StringField("Age", '', default=None)
-    user_gender_choices = [('Choose selection:', 'Choose Choose selection:'),
+    user_gender_choices = [('Choose selection:', 'Choose selection:'),
                            ('M', 'M'),
                            ('F', 'F'), ]
     add_gender_director = SelectField("Gender", choices=user_gender_choices, default=None)
@@ -218,7 +218,6 @@ def index2():
 @app.route('/insert', methods = ['POST'])
 def insert(search):
     if request.method == "POST":
-
         if search.data['add_table'] == 'User Rating':
             title = request.form['add_rec_title']
             user_rating = request.form['add_user_rating']
@@ -270,7 +269,7 @@ def insert(search):
                 flash("Director Record Inserted Successfully")
                 return redirect('/Directors')
 
-        elif search.data['add_table'] == 'Movie':
+        elif search.data['add_table'] == 'Movie/TV Show/Episode':
             category = search.data['add_category']
             title = request.form['add_movie_title']
             country = request.form['add_country']
@@ -308,26 +307,34 @@ def insert(search):
                 conn.commit()
                 flash("Movie/TV Show/Episode Records Inserted Successfully")
                 return redirect('/Movies')
+        else:
+            conn.rollback()
+            return ('Rollback')
 ###################################################################################
 
 ########################## Updating ###############################################
 @app.route('/update',methods=['POST','GET'])
 def update():
-    if request.method == 'POST':
-        MovieId = request.form['MovieId']
-        Category = request.form['Category']
-        Title = request.form['Title']
-        Country = request.form['Country']
-        ReleaseYear = request.form['ReleaseYear']
-        Duration = request.form['Duration']
-        Description = request.form['Description']
-        cursor.execute("""
-               UPDATE Movies
-               SET Category=%s,Title=%s,Country=%s,ReleaseYear=%s,Duration=%s,Description=%s
-               WHERE MovieId=%s
-            """, (Category, Title, Country, ReleaseYear, Duration, Description, MovieId,))
-        conn.commit()
-        return redirect(url_for('Movies'))
+    try:
+        if request.method == 'POST':
+            MovieId = request.form['MovieId']
+            Category = request.form['Category']
+            Title = request.form['Title']
+            Country = request.form['Country']
+            ReleaseYear = request.form['ReleaseYear']
+            Duration = request.form['Duration']
+            Description = request.form['Description']
+            cursor.execute("""
+                   UPDATE Movies
+                   SET Category=%s,Title=%s,Country=%s,ReleaseYear=%s,Duration=%s,Description=%s
+                   WHERE MovieId=%s
+                """, (Category, Title, Country, ReleaseYear, Duration, Description, MovieId,))
+            conn.commit()
+            return redirect(url_for('Movies'))
+    except Exception:
+        # reverting changes because of exception
+        conn.rollback()
+        return('Rollback')
 
 ########################## Deleting ###############################################
 # set DeletedAt = current_date
