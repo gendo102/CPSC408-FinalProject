@@ -60,3 +60,4 @@ CREATE TABLE StreamingService (
    FOREIGN KEY (MovieId) REFERENCES Movies (MovieId)
 );
 
+create index MovieId_Index on Movies(MovieId);
