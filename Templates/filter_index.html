@@ -1,6 +1,7 @@
+<!DOCTYPE html>
+
 {% include "home.html" %}
 
-<doctype html="">
 {% with messages = get_flashed_messages() %}
   {% if messages %}
     <ul class="flashes">
@@ -12,26 +13,55 @@
 {% endwith %}
 {% from "_formhelpers.html" import render_field %}
 
-
-<form method="post">
-  <dl>
-      <h4>Choose How to Filter Data:</h4>
-    {{ render_field(form.select_filter) }}
-    <p>
-      {{ render_field(form.select_rating) }}
-    <p>
-     {{ render_field(form.select_genre) }}
-    <p>
-     {{ render_field(form.select_category) }}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Filtering</title>
+</head>
+<body>
+    <form method="post">
+         <div style="background-color:DarkSeaGreen;color:black;padding:20px;">
+              <h2>FILTERING:</h2>
+        <p>
+       <h2>Categories:</h2>
+              {{ form.hidden_tag() }}
+        {{ form.categories_enter }}
       <p>
-        {{ render_field(form.select_platform) }}
+            <h2>Rating:</h2>
+              {{ form.hidden_tag() }}
+        {{ form.ratings_enter }}
+             <p>
+      <h2>Countries:</h2>
+              {{ form.hidden_tag() }}
+        {{ form.countries_enter }}
       <p>
-
+             <h2>User Ratings:</h2>
+              {{ form.hidden_tag() }}
+        {{ form.user_rating_enter }}
+      <p>
+             <p>
+               <h2>Genres:</h2>
+              {{ form.hidden_tag() }}
+        {{ form.genre_enter }}
+      <p>
+                <p>
+               <h2>Streaming Services:</h2>
+              {{ form.hidden_tag() }}
+        {{ form.platforms_enter }}
+      <p>
+        <button type="submit">Submit</button>
+             </div>
+        <div>
+</div>
+        <div style="background-color:LightPink;color:black;padding:20px;">
+              <h2>FILTERING:</h2>
 <h4>Choose How to Search Data:</h4>
         {{ render_field(form.search_options) }}
       <p>
         {{ render_field(form.search_field) }}
   </p></dl>
   <p><input type="submit" value="Search">
-</p></form>
-</doctype>
+</div>
+  </p></dl>
+    </form>
+</body>
