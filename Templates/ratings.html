@@ -10,13 +10,26 @@ table {
     width: 100%;
 
 }
-td, th {
+th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 10px;
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: #92a8d1;
+
+}
+td {
     border: 1px solid #dddddd;
     text-align: left;
     padding: 8px;
+
 }
 tr:nth-child(even) {
     background-color: #dddddd;
+
 }
 tr:nth-child(odd){
     background-color: #848484;
@@ -28,8 +41,8 @@ tr:nth-child(odd){
   height:300px;
   overflow:auto;
   margin-top:20px;
-}
 
+}
 
 </style>
 
