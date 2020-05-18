@@ -651,17 +651,6 @@ def index():
             else:
                 return render_template('complete_movie_search_results.html', result=result, content_type='application/json')
 
-    # cursor.execute( "SELECT Movies.*, GenreType, Rating, Platform, DateAdded, UserRating FROM Movies LEFT JOIN Genres ON (Movies.MovieId = Genres.MovieId) LEFT JOIN Ratings ON (Movies.MovieId = Ratings.MovieId) LEFT JOIN StreamingService ON (StreamingService.MovieId= Movies.MovieId) LEFT JOIN Recommendations ON (Recommendations.MovieId= Movies.MovieId) WHERE Category IN ({}) AND Platform IN ({}) AND Rating IN ({})".format(
-    #             str(categories)[1:-1], str(platforms)[1:-1], str(entered_ratings)[1:-1]))
-
-    #     result = cursor.fetchall()
-    # return render_template('complete_movie_search_results.html', result=result, content_type='application/json')
-    #     if cursor.rowcount == 0:
-    #         flash('No results found!')
-    #         return redirect('/')
-    #    else:
-    #        return render_template('complete_movie_search_results.html', result=result, content_type='application/json')
-
     else:
         return render_template('filter_index.html', form=form)
 
