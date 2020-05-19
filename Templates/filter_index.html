@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-
 {% include "home.html" %}
+
 
 {% with messages = get_flashed_messages() %}
   {% if messages %}
@@ -31,19 +31,6 @@
               {{ form.hidden_tag() }}
         {{ form.ratings_enter }}
              <p>
-      <h2>Countries:</h2>
-              {{ form.hidden_tag() }}
-        {{ form.countries_enter }}
-      <p>
-             <h2>User Ratings:</h2>
-              {{ form.hidden_tag() }}
-        {{ form.user_rating_enter }}
-      <p>
-             <p>
-               <h2>Genres:</h2>
-              {{ form.hidden_tag() }}
-        {{ form.genre_enter }}
-      <p>
                 <p>
                <h2>Streaming Services:</h2>
               {{ form.hidden_tag() }}
@@ -54,7 +41,7 @@
         <div>
 </div>
         <div style="background-color:LightPink;color:black;padding:20px;">
-              <h2>FILTERING:</h2>
+              <h2>SEARCHING:</h2>
 <h4>Choose How to Search Data:</h4>
         {{ render_field(form.search_options) }}
       <p>
@@ -65,3 +52,11 @@
   </p></dl>
     </form>
 </body>
+
+
+<style>
+    ul
+{
+    list-style-type: none;
+}
+</style>
