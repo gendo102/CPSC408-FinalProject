@@ -646,10 +646,10 @@ def index():
                 return render_template('complete_movie_search_results.html', result=result,
                                        content_type='application/json')
         else:
-            cursor.execute(
-                "SELECT Movies.*, GenreType, Rating, Platform, DateAdded, UserRating FROM Movies LEFT JOIN Genres ON (Movies.MovieId = Genres.MovieId) LEFT JOIN Ratings ON (Movies.MovieId = Ratings.MovieId) LEFT JOIN StreamingService ON (StreamingService.MovieId= Movies.MovieId) LEFT JOIN Recommendations ON (Recommendations.MovieId= Movies.MovieId) WHERE Category IN ({}) AND Platform IN ({}) AND Rating IN ({})".format(
+            cursor.execute("SELECT Movies.*, GenreType, Rating, Platform, DateAdded, UserRating FROM Movies LEFT JOIN Genres ON (Movies.MovieId = Genres.MovieId) LEFT JOIN Ratings ON (Movies.MovieId = Ratings.MovieId) LEFT JOIN StreamingService ON (StreamingService.MovieId= Movies.MovieId) LEFT JOIN Recommendations ON (Recommendations.MovieId= Movies.MovieId) WHERE Category IN ({}) AND Platform IN ({}) AND Rating IN ({})".format(
                     str(categories)[1:-1], str(platforms)[1:-1], str(entered_ratings)[1:-1]))
             result = cursor.fetchall()
+
             if cursor.rowcount == 0:
                 flash('No results found!')
                 return redirect('/index')
@@ -658,6 +658,34 @@ def index():
 
     else:
         return render_template('filter_index.html', form=form)
+
+###SUGGESTIONS
+###Looks at the top 3 tv-ratings for the user's highest user ratings and the top 5 genres for the user's highest user ratings
+###gives info about 10 movies based on these values (makes sure that the user has not rated them so it can be updated as the user enters more ratings)
+@app.route('/suggestions', methods=['GET', 'POST'])
+def suggestions():
+    cursor.execute(
+        "SELECT Rating, MAX(UserRating) FROM Ratings INNER JOIN Recommendations ON (Recommendations.MovieId= Ratings.MovieId) GROUP BY Rating ORDER BY MAX(UserRating) DESC LIMIT 3")
+    list_ratings = [x[0] for x in cursor.fetchall()]
+
+    cursor.execute("SELECT GenreType, MAX(UserRating) FROM Genres INNER JOIN Recommendations ON (Recommendations.MovieId= Genres.MovieId) GROUP BY GenreType ORDER BY MAX(UserRating) DESC LIMIT 5")
+    list = [x[0] for x in cursor.fetchall()]
+
+    split_list = [i.split(',', 1)[0] for i in list]
+
+    new_list = []
+
+
+    for i in range(len(split_list)):
+        next_list = '%' + split_list[i] + '%'
+        new_list.append(next_list)
+
+    # print(new_list[0])
+    cursor.execute(
+        "SELECT Movies.*, GenreType, Rating, Platform, DateAdded, UserRating FROM Ratings INNER JOIN Movies ON (Movies.MovieId= Ratings.MovieId) LEFT JOIN Genres ON (Movies.MovieId = Genres.MovieId) LEFT JOIN StreamingService ON (StreamingService.MovieId= Movies.MovieId)LEFT JOIN Recommendations ON (Recommendations.MovieId= Movies.MovieId) WHERE Rating IN ({}) AND (GenreType LIKE %s OR GenreType LIKE %s  OR GenreType LIKE %s  OR GenreType LIKE %s OR GenreType LIKE %s) AND UserRating IS NULL LIMIT 10".format(str(list_ratings)[1:-1]), (new_list[0], new_list[1], new_list[2], new_list[3], new_list[4],))
+    result = cursor.fetchall()
+
+    return render_template('complete_movie_search_results.html', result=result, content_type='application/json')
 
 # Main method
 if __name__ == '__main__':
