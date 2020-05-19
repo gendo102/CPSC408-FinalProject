@@ -133,6 +133,8 @@ body {
         <ul>
             <li><a href="{{ url_for('index2') }}">Insert New Record</a></li>
             <li><a href="{{ url_for('index') }}">Filtering</a></li>
+            <li><a href="{{ url_for('update') }}">Update a Record</a></li>
+            <li><a href="{{ url_for('suggestions') }}">Suggestions</a></li>
         </ul>
     </nav>
   </div>
@@ -146,10 +148,22 @@ table {
     width: 100%;
 
 }
-td, th {
+th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 10px;
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: #92a8d1;
+
+}
+td {
     border: 1px solid #dddddd;
     text-align: left;
     padding: 8px;
+
 }
 tr:nth-child(even) {
     background-color: #dddddd;
