@@ -518,6 +518,24 @@ class SimpleForm(FlaskForm):
     ratings_files = [(x, x) for x in list_of_ratings]
     ratings_enter = MultiCheckboxField('Label', choices=ratings_files)
 
+    ###COUNTRIES
+    string_of_countries = [
+        'Argentina\r\nAustralia\r\nAustria\r\nBrazil\r\nBulgaria\r\nCanada\r\nChile\r\nChina\r\nColombia\r\n'
+        'Denmark\r\nEgypt\r\nFinland\r\nFrance\r\nGermany\r\nHong Kong\r\nHungary\r\nIndia\r\nIreland\r\n'
+        'Israel\r\nItaly\r\nJapan\r\nMexico\r\nNetherlands\r\nNew_Zealand\r\nNigeria\r\nNorway\r\nPakistan\r\nPeru\r\n'
+        'Philippines\r\nRomania\r\nSouth Korea\r\nSpain\r\nSweden\r\nSwitzerland\r\nTanzania\r\nThailand\r\n'
+        'Turkey\r\nUnited_Kingdom\r\nUnited_States\r\nVietnam\r\n']
+    list_of_countries = string_of_countries[0].split()
+    countries_files = [(x, x) for x in list_of_countries]
+    countries_enter = MultiCheckboxField('Label', choices=countries_files)
+
+    ###GENRES
+    string_of_genres = ['Action\r\nAdventure\r\nAnimation\r\nComedies\r\nCrime\r\nDocumentaries\r\nDramas\r\nFamily\r\nHorror\r\nIndependent\r\nRomantic\r\nSci-Fi\r\nSports\r\n']
+    list_of_genres = string_of_genres[0].split()
+    # create a list of value/description tuples
+    genre_files = [(x, x) for x in list_of_genres]
+    genre_enter = MultiCheckboxField('Label', choices=genre_files)
+
     ###STREAMING SERVICES
     string_of_platforms = ['Netflix\r\nDisney+\r\nHulu\r\n']
     list_of_platforms = string_of_platforms[0].split()
@@ -531,8 +549,6 @@ class SimpleForm(FlaskForm):
                       ('Year', 'Year'),
                       ('Actor', 'Actor'),
                       ('Director', 'Director'),
-                      ('Country', 'Country'),
-                      ('Genre', 'Genre'),
                       ('User Rating', 'User Rating')]
     search_options = SelectField('Search for:', choices=choices_search)
     search_field = StringField('')
@@ -557,6 +573,52 @@ def index():
         else:
             entered_ratings = form.ratings_enter.data
 
+
+        ###COUNTRIES
+        countries_list = []
+        if not form.countries_enter.data:
+            all_countries_list = ['Argentina', 'Australia', 'Austria', 'Brazil', 'Bulgaria', 'Canada',
+                               'Chile', 'China', 'Colombia', 'Denmark', 'Denmark', 'Egypt', 'Finland', 'France',
+                               'Germany', 'Hong Kong', 'Hungary', 'India', 'Ireland', 'Israel', 'Italy', 'Japan',
+                               'Mexico', 'Netherlands', 'New Zealand', 'Nigeria', 'Norway', 'Pakistan', 'Peru',
+                               'Philippines', 'Romania', 'South Korea', 'Spain', 'Sweden', 'Switzerland', 'Tanzania', 'Thailand',
+                               'Turkey', 'United Kingdom', 'United States', 'Vietnam']
+            for i in range(len(all_countries_list)):
+                next_list = '%' + all_countries_list[i] + '%'
+                countries_list.append(next_list)
+        else:
+            countries_list_1 = []
+            entered_countries = form.countries_enter.data
+
+            for i in range(len(entered_countries)):
+                next_list = '%' + entered_countries[i] + '%'
+                countries_list_1.append(next_list)
+                if len(countries_list_1) < 42:
+                    for i in range(42 - len(entered_countries)):
+                        countries_list_1.append(' '' ')
+                        countries_list = countries_list_1
+                    else:
+                        countries_list = countries_list_1
+        ###GENRES
+        genre_list = []
+        if not form.genre_enter.data:
+            all_genre_list = ['Action', 'Adventure', 'Animation', 'Comedies', 'Crime', 'Documentaries', 'Dramas', 'Family', 'Horror', 'Independent', 'Romantic', 'Sci-Fi', 'Sports']
+            for i in range(len(all_genre_list)):
+                next_list = '%' + all_genre_list[i] + '%'
+                genre_list.append(next_list)
+        else:
+            genre_list_1 = []
+            entered_genres = form.genre_enter.data
+
+            for i in range(len(entered_genres)):
+                next_list = '%' + entered_genres[i] + '%'
+                genre_list_1.append(next_list)
+            if len(genre_list_1) < 13:
+                for i in range(13 - len(entered_genres)):
+                    genre_list_1.append(' '' ')
+                genre_list = genre_list_1
+            else:
+                genre_list = genre_list_1
 
         ###STREAMING SERVICES
         if not form.platforms_enter.data:
@@ -608,33 +670,8 @@ def index():
             else:
                 return render_template('person_search_results.html', result=result, content_type='application/json')
 
-        elif request.form['search_options'] == 'Country':
-            search_string = "%" + request.form['search_field'] + "%"
-            cursor.execute(
-                """SELECT Movies.*, GenreType, Rating, Platform, DateAdded, UserRating FROM Movies LEFT JOIN Genres ON (Movies.MovieId = Genres.MovieId) LEFT JOIN Ratings ON (Movies.MovieId = Ratings.MovieId) LEFT JOIN StreamingService ON (StreamingService.MovieId= Movies.MovieId) LEFT JOIN Recommendations ON (Recommendations.MovieId= Movies.MovieId) WHERE Country LIKE %s;""",
-                (search_string,))
-            result = cursor.fetchall()
-            if cursor.rowcount == 0:
-                flash('No results found!')
-                return redirect('/index')
-            else:
-                return render_template('complete_movie_search_results.html', result=result, content_type='application/json')
-
-        elif request.form['search_options'] == 'Genre':
-            search_string = "%" + request.form['search_field'] + "%"
-            cursor.execute(
-                """SELECT Movies.*, GenreType, Rating, Platform, DateAdded, UserRating FROM Movies LEFT JOIN Genres ON (Movies.MovieId = Genres.MovieId) LEFT JOIN Ratings ON (Movies.MovieId = Ratings.MovieId) LEFT JOIN StreamingService ON (StreamingService.MovieId= Movies.MovieId) LEFT JOIN Recommendations ON (Recommendations.MovieId= Movies.MovieId) WHERE GenreType LIKE %s;""",
-                (search_string,))
-            result = cursor.fetchall()
-            if cursor.rowcount == 0:
-                flash('No results found!')
-                return redirect('/index')
-            else:
-                return render_template('complete_movie_search_results.html', result=result,
-                                       content_type='application/json')
-
         elif request.form['search_options'] == 'User Rating':
-            search_string = "%" + request.form['search_field'] + "%"
+            search_string = request.form['search_field']
             cursor.execute(
                 """SELECT Movies.*, GenreType, Rating, Platform, DateAdded, UserRating FROM Movies LEFT JOIN Genres ON (Movies.MovieId = Genres.MovieId) LEFT JOIN Ratings ON (Movies.MovieId = Ratings.MovieId) LEFT JOIN StreamingService ON (StreamingService.MovieId= Movies.MovieId) LEFT JOIN Recommendations ON (Recommendations.MovieId= Movies.MovieId) WHERE UserRating = %s;""",
                 (search_string,))
@@ -646,8 +683,21 @@ def index():
                 return render_template('complete_movie_search_results.html', result=result,
                                        content_type='application/json')
         else:
-            cursor.execute("SELECT Movies.*, GenreType, Rating, Platform, DateAdded, UserRating FROM Movies LEFT JOIN Genres ON (Movies.MovieId = Genres.MovieId) LEFT JOIN Ratings ON (Movies.MovieId = Ratings.MovieId) LEFT JOIN StreamingService ON (StreamingService.MovieId= Movies.MovieId) LEFT JOIN Recommendations ON (Recommendations.MovieId= Movies.MovieId) WHERE Category IN ({}) AND Platform IN ({}) AND Rating IN ({})".format(
-                    str(categories)[1:-1], str(platforms)[1:-1], str(entered_ratings)[1:-1]))
+            cursor.execute("SELECT Movies.*, GenreType, Rating, Platform, DateAdded, UserRating FROM Movies LEFT JOIN Genres ON (Movies.MovieId = Genres.MovieId) LEFT JOIN Ratings ON (Movies.MovieId = Ratings.MovieId) LEFT JOIN StreamingService ON (StreamingService.MovieId= Movies.MovieId) LEFT JOIN Recommendations ON (Recommendations.MovieId= Movies.MovieId) WHERE Category IN ({}) AND Platform IN ({}) AND Rating IN ({}) AND "
+                           "(GenreType LIKE %s OR GenreType LIKE %s OR GenreType LIKE %s OR GenreType LIKE %s OR GenreType LIKE %s OR GenreType LIKE %s OR GenreType LIKE %s OR GenreType LIKE %s OR GenreType LIKE %s OR GenreType LIKE %s OR GenreType LIKE %s OR GenreType LIKE %s OR GenreType LIKE %s) AND (Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s"
+                           "OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s"
+                           "OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s OR Country LIKE %s)".format(
+                   str(categories)[1:-1], str(platforms)[1:-1], str(entered_ratings)[1:-1]), (genre_list[0], genre_list[1], genre_list[2], genre_list[3], genre_list[4],genre_list[5], genre_list[6], genre_list[7], genre_list[8], genre_list[9], genre_list[10],
+                                                                                              genre_list[11], genre_list[12], countries_list[0], countries_list[1], countries_list[2], countries_list[3], countries_list[4],
+                                                                                              countries_list[5], countries_list[6], countries_list[7], countries_list[8], countries_list[9],
+                                                                                              countries_list[10], countries_list[11], countries_list[12], countries_list[13], countries_list[14],
+                                                                                              countries_list[15],countries_list[16],countries_list[17],countries_list[18],countries_list[19],countries_list[20],
+                                                                                              countries_list[21],countries_list[22],countries_list[23],countries_list[24],countries_list[25],countries_list[26],
+                                                                                              countries_list[27],countries_list[28],countries_list[29],countries_list[30],countries_list[31],countries_list[32],
+                                                                                              countries_list[33],countries_list[34],countries_list[35],countries_list[36],countries_list[37],countries_list[38],
+                                                                                              countries_list[39],countries_list[40],countries_list[41],))
+
+
             result = cursor.fetchall()
 
             if cursor.rowcount == 0:
