@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+{% include "home.html" %}
+
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class="flashes">
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+{% from "_formhelpers.html" import render_field %}
+
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>UPDATING</title>
+</head>
+<body>
+    <form method="post">
+
+        <div style="background-color:LightPink;color:black;padding:20px;">
+              <h2>UPDATING:</h2>
+<h3>Please enter in the following values:</h3>
+             {{ form.csrf_token }}
+        {{ render_field(form.update_field_category) }}
+        <p>
+             {{ form.csrf_token }}
+        {{ render_field(form.update_field_title) }}
+        </p>
+        <p>
+             {{ form.csrf_token }}
+        {{ render_field(form.update_field_country) }}
+        </p>
+            <p>
+                 {{ form.csrf_token }}
+        {{ render_field(form.update_field_release_year) }}
+             </p>
+            <p>
+                 {{ form.csrf_token }}
+        {{ render_field(form.update_field_duration) }}
+             </p>
+            <p>
+                 {{ form.csrf_token }}
+        {{ render_field(form.update_field_description) }}
+             </p>
+            <p>
+                 {{ form.csrf_token }}
+          {{ render_field(form.update_field_genre) }}
+             </p>
+              <p>
+                   {{ form.csrf_token }}
+        {{ render_field(form.update_field_tv_rating) }}
+             </p>
+              <p>
+                   {{ form.csrf_token }}
+         {{ render_field(form.update_field_user_rating) }}
+             </p>
+              <p>
+                   {{ form.csrf_token }}
+          {{ render_field(form.update_field_platform) }}
+                   </p>
+  </p></dl>
+  <p><input type="submit" value="Submit">
+</div>
+  </p></dl>
+    </form>
+</body>
