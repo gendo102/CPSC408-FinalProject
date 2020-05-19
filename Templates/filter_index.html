@@ -2,6 +2,7 @@
 {% include "home.html" %}
 
 
+
 {% with messages = get_flashed_messages() %}
   {% if messages %}
     <ul class="flashes">
@@ -27,9 +28,17 @@
               {{ form.hidden_tag() }}
         {{ form.categories_enter }}
       <p>
-            <h2>Rating:</h2>
+            <h2>Ratings:</h2>
               {{ form.hidden_tag() }}
         {{ form.ratings_enter }}
+             <p>
+             <h2>Countries:</h2>
+              {{ form.hidden_tag() }}
+        {{ form.countries_enter }}
+      <p>
+             <h2>Genres:</h2>
+              {{ form.hidden_tag() }}
+        {{ form.genre_enter }}
              <p>
                 <p>
                <h2>Streaming Services:</h2>
