@@ -7,11 +7,9 @@ import io
 import csv
 import datetime
 
-
-
-app = Flask(__name__, template_folder="templates")
+app = Flask(__name__, template_folder="Templates")
 app.secret_key = '701701'
-conn = pymysql.connect("34.83.209.196","root","PASSWORD","FINALPROJECT")
+conn = pymysql.connect("34.83.8.98","root","PASSWORD","FinalProject")
 cursor = conn.cursor()
 
 @app.route('/', methods=['GET', 'POST'])
@@ -29,43 +27,43 @@ def home():
 class Content:
     def movies_list(self):
         cursor.execute(
-            "SELECT * FROM Movies")
+            "SELECT MovieId,Category,Title,Country,ReleaseYear,Duration,Description FROM Movies WHERE DeletedAt IS NULL")
         result = cursor.fetchall()
         return result
 
     def actors_list(self):
         cursor.execute(
-            "SELECT * FROM Actors")
+            "SELECT ActorId,ActorName,Age,Gender FROM Actors WHERE DeletedAt IS NULL")
         result = cursor.fetchall()
         return result
 
     def directors_list(self):
         cursor.execute(
-            "SELECT * FROM Directors")
+            "SELECT DirectorId,DirectorName,Age,Gender FROM Directors WHERE DeletedAt IS NULL")
         result = cursor.fetchall()
         return result
 
     def genres_list(self):
         cursor.execute(
-            "SELECT * FROM Genres")
+            "SELECT MovieId,GenreType FROM Genres WHERE DeletedAt IS NULL")
         result = cursor.fetchall()
         return result
 
     def ratings_list(self):
         cursor.execute(
-            "SELECT * FROM Ratings")
+            "SELECT MovieId,Rating FROM Ratings WHERE DeletedAt IS NULL")
         result = cursor.fetchall()
         return result
 
     def recommendations_list(self):
         cursor.execute(
-            "SELECT * FROM Recommendations")
+            "SELECT MovieId,UserRating FROM Recommendations WHERE DeletedAt IS NULL")
         result = cursor.fetchall()
         return result
 
     def streamingservice_list(self):
         cursor.execute(
-            "SELECT * FROM StreamingService")
+            "SELECT MovieId,Platform,DateAdded FROM StreamingService WHERE DeletedAt IS NULL")
         result = cursor.fetchall()
         return result
 
@@ -227,7 +225,7 @@ def insert(search):
             #need to add in conditional for if AtDeleted is null once update it is set up
             cursor.execute("""SELECT * FROM Recommendations WHERE MovieID IN(SELECT MovieID
                                                                            FROM Movies
-                                                                           WHERE Title = %s);""", (title,))
+                                                                           WHERE Title = %s AND DeletedAt IS NULL);""", (title,))
             result = cursor.fetchall()
             if cursor.rowcount != 0:
                 flash('Recommendation already exists!')
@@ -235,7 +233,7 @@ def insert(search):
                 return redirect('/index2')
             else:
                 cursor.execute("""INSERT INTO Recommendations(UserRating,MovieId)
-                                      SELECT %s, MovieId FROM Movies WHERE Title = %s;""", (user_rating, title,))
+                                      SELECT %s, MovieId FROM Movies WHERE Title = %s AND DeletedAt IS NULL;""", (user_rating, title,))
                 conn.commit()
                 flash("Recommendation Record Inserted Successfully")
                 return redirect('/index2')
@@ -245,7 +243,7 @@ def insert(search):
             actor_name = request.form['add_actor_name']
             actor_age = request.form['add_actor_age']
             actor_gender = search.data['add_gender_actor']
-            cursor.execute("""SELECT *  FROM Actors WHERE ActorName = %s;""", (actor_name,))
+            cursor.execute("""SELECT *  FROM Actors WHERE ActorName = %s AND DeletedAt IS NULL;""", (actor_name,))
             result = cursor.fetchall()
             if cursor.rowcount != 0:
                 flash('Actor already exists!')
@@ -261,7 +259,7 @@ def insert(search):
             director_name = request.form['add_director_name']
             director_age = request.form['add_director_age']
             director_gender = search.data['add_gender_director']
-            cursor.execute("""SELECT *  FROM Directors WHERE DirectorName = %s;""", (director_name,))
+            cursor.execute("""SELECT *  FROM Directors WHERE DirectorName = %s AND DeletedAt IS NULL;""", (director_name,))
             result = cursor.fetchall()
             if cursor.rowcount != 0:
                 flash('Director already exists!')
@@ -289,7 +287,7 @@ def insert(search):
                                 INNER JOIN Genres ON(Movies.MovieId = Genres.MovieId)
                                 INNER JOIN Ratings ON(Movies.MovieId = Ratings.MovieId)
                                 INNER JOIN StreamingService on (StreamingService.MovieId= Movies.MovieId)
-                                WHERE Title = %s;""",(title,))
+                                WHERE Title = %s AND Movies.DeletedAt IS NULL;""",(title,))
             result = cursor.fetchall()
 
             if cursor.rowcount != 0:
@@ -300,13 +298,13 @@ def insert(search):
                                                   VALUES (%s, %s, %s, %s, %s, %s);""",
                            (category, title, country, release_year, duration, description,))
                 cursor.execute("""INSERT INTO Genres(GenreType,MovieId)
-                                                  SELECT %s, MovieId FROM Movies WHERE Title = %s;""",
+                                                  SELECT %s, MovieId FROM Movies WHERE Title = %s AND DeletedAt IS NULL;""",
                            (genre, title,))
                 cursor.execute("""INSERT INTO Ratings(Rating,MovieId)
-                                                              SELECT %s, MovieId FROM Movies WHERE Title = %s;""",
+                                                              SELECT %s, MovieId FROM Movies WHERE Title = %s AND DeletedAt IS NULL;""",
                            (rating, title,))
                 cursor.execute("""INSERT INTO StreamingService(Platform,MovieId, DateAdded)
-                                                              SELECT %s, MovieId, %s FROM Movies WHERE Title = %s;""",
+                                                              SELECT %s, MovieId, %s FROM Movies WHERE Title = %s AND DeletedAt IS NULL;""",
                            (platform, str(datetime.datetime.now()), title))
                 conn.commit()
                 flash("Movie/TV Show/Episode Records Inserted Successfully")
@@ -346,7 +344,7 @@ def update():
         user_rating = request.form['update_field_user_rating']
         platform = request.form['update_field_platform']
 
-        cursor.execute("""SELECT Title FROM Movies WHERE Title = %s;""",(title,))
+        cursor.execute("""SELECT Title FROM Movies WHERE Title LIKE %s AND DeletedAt IS NULL;""",(title,))
 
         if cursor.rowcount == 0:
             flash('No results found!')
@@ -630,7 +628,7 @@ def index():
 
         if request.form['search_options'] == 'Title':
             search_string = "%" + request.form['search_field'] + "%"
-            cursor.execute("""SELECT Movies.*, GenreType, Rating, Platform, DateAdded, UserRating FROM Movies LEFT JOIN Genres ON (Movies.MovieId = Genres.MovieId) LEFT JOIN Ratings ON (Movies.MovieId = Ratings.MovieId) LEFT JOIN StreamingService ON (StreamingService.MovieId= Movies.MovieId) LEFT JOIN Recommendations ON (Recommendations.MovieId= Movies.MovieId) WHERE Title LIKE %s;""",
+            cursor.execute("""SELECT Movies.*, GenreType, Rating, Platform, DateAdded, UserRating FROM Movies LEFT JOIN Genres ON (Movies.MovieId = Genres.MovieId) LEFT JOIN Ratings ON (Movies.MovieId = Ratings.MovieId) LEFT JOIN StreamingService ON (StreamingService.MovieId= Movies.MovieId) LEFT JOIN Recommendations ON (Recommendations.MovieId= Movies.MovieId) WHERE Title LIKE %s AND Movies.DeletedAt IS NULL;""",
                 (search_string,))
             result = cursor.fetchall()
             if cursor.rowcount == 0:
@@ -641,7 +639,7 @@ def index():
 
         elif request.form['search_options'] == 'Year':
             search_string = "%" + request.form['search_field'] + "%"
-            cursor.execute("""SELECT Movies.*, GenreType, Rating, Platform, DateAdded, UserRating FROM Movies LEFT JOIN Genres ON (Movies.MovieId = Genres.MovieId) LEFT JOIN Ratings ON (Movies.MovieId = Ratings.MovieId) LEFT JOIN StreamingService ON (StreamingService.MovieId= Movies.MovieId) LEFT JOIN Recommendations ON (Recommendations.MovieId= Movies.MovieId) WHERE ReleaseYear LIKE %s;""",
+            cursor.execute("""SELECT Movies.*, GenreType, Rating, Platform, DateAdded, UserRating FROM Movies LEFT JOIN Genres ON (Movies.MovieId = Genres.MovieId) LEFT JOIN Ratings ON (Movies.MovieId = Ratings.MovieId) LEFT JOIN StreamingService ON (StreamingService.MovieId= Movies.MovieId) LEFT JOIN Recommendations ON (Recommendations.MovieId= Movies.MovieId) WHERE ReleaseYear LIKE %s AND Movies.DeletedAt IS NULL;""",
                 (search_string,))
             result = cursor.fetchall()
             if cursor.rowcount == 0:
@@ -652,7 +650,7 @@ def index():
 
         elif request.form['search_options'] == 'Actor':
             search_string = "%" + request.form['search_field'] + "%"
-            cursor.execute("""SELECT * FROM Actors WHERE ActorName LIKE %s;""", (search_string,))
+            cursor.execute("""SELECT * FROM Actors WHERE ActorName LIKE %s AND DeletedAt IS NULL;""", (search_string,))
             result = cursor.fetchall()
             if cursor.rowcount == 0:
                 flash('No results found!')
@@ -662,7 +660,7 @@ def index():
 
         elif request.form['search_options'] == 'Director':
             search_string = "%" + request.form['search_field'] + "%"
-            cursor.execute("""SELECT * FROM Directors WHERE DirectorName LIKE %s;""", (search_string,))
+            cursor.execute("""SELECT * FROM Directors WHERE DirectorName LIKE %s AND DeletedAt IS NULL;""", (search_string,))
             result = cursor.fetchall()
             if cursor.rowcount == 0:
                 flash('No results found!')
@@ -673,7 +671,7 @@ def index():
         elif request.form['search_options'] == 'User Rating':
             search_string = request.form['search_field']
             cursor.execute(
-                """SELECT Movies.*, GenreType, Rating, Platform, DateAdded, UserRating FROM Movies LEFT JOIN Genres ON (Movies.MovieId = Genres.MovieId) LEFT JOIN Ratings ON (Movies.MovieId = Ratings.MovieId) LEFT JOIN StreamingService ON (StreamingService.MovieId= Movies.MovieId) LEFT JOIN Recommendations ON (Recommendations.MovieId= Movies.MovieId) WHERE UserRating = %s;""",
+                """SELECT Movies.*, GenreType, Rating, Platform, DateAdded, UserRating FROM Movies LEFT JOIN Genres ON (Movies.MovieId = Genres.MovieId) LEFT JOIN Ratings ON (Movies.MovieId = Ratings.MovieId) LEFT JOIN StreamingService ON (StreamingService.MovieId= Movies.MovieId) LEFT JOIN Recommendations ON (Recommendations.MovieId= Movies.MovieId) WHERE UserRating = %s AND Movies.DeletedAt IS NULL;""",
                 (search_string,))
             result = cursor.fetchall()
             if cursor.rowcount == 0:
