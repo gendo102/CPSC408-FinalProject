@@ -59,7 +59,6 @@ tr:nth-child(odd){
         <th>Actor Name</th>
         <th>Age</th>
         <th>Gender</th>
-        <th>DeletedAt</th>
         <th>Action</th>
     </tr>
     {% for row in result %}
@@ -68,10 +67,8 @@ tr:nth-child(odd){
         <td>{{ row[1] }}</td>
         <td>{{ row[2] }}</td>
         <td>{{ row[3] }}</td>
-        <td>{{ row[4] }}</td>
 
         <td>
-        <a href="/update/{{row[0] }}" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#modaledit{{row[0]}}">Edit</a>
         <a href="/deleteAct/{{ row[0] }}" class="btn btn-danger btn-xs" onclick="return confirm('Delete?')">Delete</a>
         </td>
 
