@@ -7,6 +7,8 @@ Instructions:
 3. Run DataImporter.py by entering in the command line “python DataImporter.py final_data_new”
 4. Run flask app by entering in the command line “python FinalProject.py” 
 
+Packages: sys, flask, wtforms, flask_wtf, os, pymysql, io, csv, datetime
+
 References:
 - https://sweetcode.io/flask-python-3-mysql/
 - https://www.codementor.io/@adityamalviya/python-flask-mysql-connection-rxblpje73
